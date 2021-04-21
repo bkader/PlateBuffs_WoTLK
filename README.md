@@ -4,7 +4,6 @@ PlateBuffs 1.18.1 (r229) was the last and final version of the addon released on
 
 ## HOW TO INSTALL
 
-1. Download the package.
-2. Unzip it inside your `Interface\AddOns\` folder.
-3. You should now have a folder named `PlateBuffs_WoTLK-main`, rename it to `PlateBuffs`.
-4. Enjoy!
+1. [Download the package](https://github.com/bkader/PlateBuffs_WoTLK/archive/refs/heads/main.zip).
+2. Open the archive, then open folder `PlateBuffs_WoTLK-main`, extract the single folder to `Interface\AddOns`.
+3. Enjoy!
