@@ -163,7 +163,7 @@ core.CoreOptionsTable = {
             name = L["Watch Combatlog"],
             desc = L["Watch combatlog for people gaining/losing spells.\nDisable this if you're having performance issues."],
             order = 7,
-			get = function() return P.watchCombatlog end,
+            get = function() return P.watchCombatlog end,
             set = function(info, val)
                 P.watchCombatlog = not P.watchCombatlog
                 core:RegisterLibAuraInfo()
@@ -471,17 +471,17 @@ core.BarOptionsTable = {
             name = L["Row Growth"],
             desc = L["Which way do the bars grow, up or down."],
             order = 7,
-            values = function() return {L["Up"], L["Down"] } end,
+            values = function() return {L["Up"], L["Down"]} end,
             set = function(info, val)
                 P.barGrowth = val
                 core:ResetAllBarPoints()
             end
         },
-		separator = {
-			type = "description",
-			name = " ",
-			order = 8
-		},
+        separator = {
+            type = "description",
+            name = " ",
+            order = 8
+        },
         biggerSelfSpells = {
             type = "toggle",
             name = L["Larger self spells"],
@@ -513,7 +513,7 @@ core.BarOptionsTable = {
             name = L["Test Mode"],
             desc = L["For each spell on someone, multiply it by the number of icons per bar.\nThis option won't be saved at logout."],
             order = 12,
-			width = "full"
+            width = "full"
         }
     }
 }
@@ -532,13 +532,16 @@ core.SpellOptionsTable = {
             order = 1,
             get = function(info) return tmpNewName, tmpNewID end,
             set = function(info, val)
-                local num = tonumber(val)
-                if num then
-                    local spellName = GetSpellInfo(num)
-                    if spellName then
-                        tmpNewName = spellName
-                        tmpNewID = num
-                        return
+                local spellLink = GetSpellLink(tonumber(val) or val)
+                if spellLink then
+                    local spellID = spellLink:match("spell:(%d+)")
+                    if spellID then
+                        local spellName = GetSpellInfo(spellID)
+                        if spellName then
+                            tmpNewName = spellName
+                            tmpNewID = tonumber(spellID)
+                            return
+                        end
                     end
                 end
                 tmpNewName = val
@@ -586,7 +589,7 @@ core.DefaultSpellOptionsTable = {
             type = "description",
             name = L["Spells not in the Specific Spells list will use these options."],
             order = 1,
-			width = "full"
+            width = "full"
         },
         iconSize = {
             type = "range",
@@ -696,203 +699,221 @@ core.DefaultSpellOptionsTable = {
 }
 
 do
-	local _spelliconcache = {}
-	local function SpellString(spellID, size)
-	    size = size or 12
-	    if not _spelliconcache[spellID .. size] then
-	        if spellID and tonumber(spellID) then
-	            local icon = select(3, GetSpellInfo(spellID))
-	            _spelliconcache[spellID .. size] = "\124T" .. icon .. ":" .. size .. "\124t"
-	            return _spelliconcache[spellID .. size]
-	        else
-	            return "\124TInterface\\Icons\\" .. core.unknownIcon .. ":" .. size .. "\124t"
-	        end
-	    else
-	        return _spelliconcache[spellID .. size]
-	    end
-	end
+    local _spelliconcache = {}
+    local function SpellString(spellID, size)
+        size = size or 12
+        if not _spelliconcache[spellID .. size] then
+            if spellID and tonumber(spellID) then
+                local icon = select(3, GetSpellInfo(spellID))
+                _spelliconcache[spellID .. size] = "\124T" .. icon .. ":" .. size .. "\124t"
+                return _spelliconcache[spellID .. size]
+            else
+                return "\124TInterface\\Icons\\" .. core.unknownIcon .. ":" .. size .. "\124t"
+            end
+        else
+            return _spelliconcache[spellID .. size]
+        end
+    end
 
-	function core:BuildSpellUI()
-	    local SpellOptionsTable = core.SpellOptionsTable
-	    SpellOptionsTable.args.spellList.args = {}
+    function core:BuildSpellUI()
+        local SpellOptionsTable = core.SpellOptionsTable
+        SpellOptionsTable.args.spellList.args = {}
 
-	    local list = {}
-	    for name, data in pairs(P.spellOpts) do
-	        if not P.ignoreDefaultSpell[name] then
-	            table_insert(list, name)
-	        end
-	    end
+        local list = {}
+        for name, data in pairs(P.spellOpts) do
+            if not P.ignoreDefaultSpell[name] then
+                table_insert(list, name)
+            end
+        end
 
-	    table_sort(list, function(a, b) if (a and b) then return a < b end end)
+        table_sort(list, function(a, b)
+            if (a and b) then
+                return a < b
+            end
+        end)
 
-	    local testDone = false
-	    local spellName, data, spellID
-	    local spellDesc, spellTexture
-	    local iconSize
-	    local nameColour
-	    local iconTexture
+        local testDone = false
+        local spellName, data, spellID
+        local spellDesc, spellTexture
+        local iconSize
+        local nameColour
+        local iconTexture
 
-	    for i = 1, table_getn(list) do
-	        spellName = list[i]
-	        data = P.spellOpts[spellName]
-	        spellID = P.spellOpts[spellName].spellID or "No spellID"
-	        iconSize = data.increase or P.increase
-	        iconTexture = SpellString(spellID)
+        for i = 1, table_getn(list) do
+            spellName = list[i]
+            data = P.spellOpts[spellName]
+            spellID = P.spellOpts[spellName].spellID or "No spellID"
+            iconSize = data.increase or P.increase
+            iconTexture = SpellString(spellID)
 
-	        if data.show == 1 then
-	            nameColour = "|cff00ff00%s|r" --green
-	        elseif data.show == 3 then
-	            nameColour = "|cffff0000%s|r" --red
-	        elseif data.show == 5 then
-	            nameColour = "|cffcd00cd%s|r" --purple
-	        elseif data.show == 4 then
-	            nameColour = "|cffb9ffff%s|r" --birizoviy
-	        else
-	            nameColour = "|cffffff00%s|r" --yellow
-	        end
+            if data.show == 1 then
+                nameColour = "|cff00ff00%s|r" --green
+            elseif data.show == 3 then
+                nameColour = "|cffff0000%s|r" --red
+            elseif data.show == 5 then
+                nameColour = "|cffcd00cd%s|r" --purple
+            elseif data.show == 4 then
+                nameColour = "|cffb9ffff%s|r" --birizoviy
+            else
+                nameColour = "|cffffff00%s|r" --yellow
+            end
 
-	        spellDesc = "??"
-	        spellTexture = "Interface\\Icons\\" .. core.unknownIcon
+            spellDesc = "??"
+            spellTexture = "Interface\\Icons\\" .. core.unknownIcon
 
-	        if spellIDs[spellName] or (spellID and type(spellID) == "number") then
-	            spellIDs[spellName] = spellIDs[spellName] or spellID
-	            tooltip:SetHyperlink("spell:" .. spellIDs[spellName])
+            if spellIDs[spellName] or (spellID and type(spellID) == "number") then
+                spellIDs[spellName] = spellIDs[spellName] or spellID
+                tooltip:SetHyperlink("spell:" .. spellIDs[spellName])
 
-	            spellTexture = select(3, GetSpellInfo(spellIDs[spellName]))
+                spellTexture = select(3, GetSpellInfo(spellIDs[spellName]))
 
-	            local lines = tooltip:NumLines()
-	            if lines > 0 then
-	                spellDesc = _G[folder .. "TooltipTextLeft" .. lines] and _G[folder .. "TooltipTextLeft" .. lines]:GetText() or "??"
-	            end
-	        end
+                local lines = tooltip:NumLines()
+                if lines > 0 then
+                    spellDesc = _G[folder .. "TooltipTextLeft" .. lines] and _G[folder .. "TooltipTextLeft" .. lines]:GetText() or "??"
+                end
+            end
 
-	        --add spell to table.
-	        SpellOptionsTable.args.spellList.args[spellName] = {
-	            type = "group",
-	            name = iconTexture .. " " .. nameColour:format(spellName .. " (" .. iconSize .. ") #" .. spellID),
-	            desc = spellDesc, --L["Spell name"],
-	            order = i,
-	            args = {}
-	        }
-	        if P.addSpellDescriptions == true then
-	            SpellOptionsTable.args.spellList.args[spellName].args.spellDesc = {
-	                type = "description",
-	                name = spellDesc,
-	                image = spellTexture,
-	                imageWidth = 32,
-	                imageHeight = 32,
-	                order = 1
-	            }
-	        end
-	        SpellOptionsTable.args.spellList.args[spellName].args.showOpt = {
-	            type = "select",
-	            name = L["Show"],
-	            desc = L["Always show spell, only show your spell, never show spell"],
-	            values = {
-	                L["Always"],
-	                L["Mine only"],
-	                L["Never"],
-	                L["Only Friend"],
-	                L["Only Enemy"]
-	            },
-	            order = 2,
-	            get = function(info) return P.spellOpts[info[2]].show or 1 end,
-	            set = function(info, val)
-	                P.spellOpts[info[2]].show = val
-	                core:BuildSpellUI()
-	            end
-	        }
+            --add spell to table.
+            SpellOptionsTable.args.spellList.args[spellName] = {
+                type = "group",
+                name = iconTexture .. " " .. nameColour:format(spellName .. " (" .. iconSize .. ") #" .. spellID),
+                desc = spellDesc, --L["Spell name"],
+                order = i,
+                args = {}
+            }
+            if P.addSpellDescriptions == true then
+                SpellOptionsTable.args.spellList.args[spellName].args.spellDesc = {
+                    type = "description",
+                    name = spellDesc,
+                    image = spellTexture,
+                    imageWidth = 32,
+                    imageHeight = 32,
+                    order = 1
+                }
+            end
+            SpellOptionsTable.args.spellList.args[spellName].args.showOpt = {
+                type = "select",
+                name = L["Show"],
+                desc = L["Always show spell, only show your spell, never show spell"],
+                values = {
+                    L["Always"],
+                    L["Mine only"],
+                    L["Never"],
+                    L["Only Friend"],
+                    L["Only Enemy"]
+                },
+                order = 2,
+                get = function(info)
+                    return P.spellOpts[info[2]].show or 1
+                end,
+                set = function(info, val)
+                    P.spellOpts[info[2]].show = val
+                    core:BuildSpellUI()
+                end
+            }
 
-	        SpellOptionsTable.args.spellList.args[spellName].args.spellID = {
-	            type = "input",
-	            name = "Spell ID",
-	            desc = "Change spellID",
-	            order = 3,
-	            get = function(info) return tostring(P.spellOpts[info[2]].spellID or "Spell ID not set") end,
-	            set = function(info, val)
-	                local num = tonumber(val)
-	                if num then
-	                    P.spellOpts[info[2]].spellID = num
-	                else
-	                    P.spellOpts[info[2]].spellID = "No SpellID"
-	                end
-	            end
-	        }
-	        SpellOptionsTable.args.spellList.args[spellName].args.iconSize = {
-	            type = "range",
-	            name = L["Icon multiplication"],
-	            desc = L["Size of the icons."],
-	            order = 4,
-	            min = 1, max = 3, step = 0.1,
-	            get = function(info) return P.spellOpts[info[2]].increase or P.increase end,
-	            set = function(info, val)
-	                P.spellOpts[info[2]].increase = val
+            SpellOptionsTable.args.spellList.args[spellName].args.spellID = {
+                type = "input",
+                name = "Spell ID",
+                desc = "Change spellID",
+                order = 3,
+                get = function(info)
+                    return tostring(P.spellOpts[info[2]].spellID or "Spell ID not set")
+                end,
+                set = function(info, val)
+                    local num = tonumber(val)
+                    if num then
+                        P.spellOpts[info[2]].spellID = num
+                    else
+                        P.spellOpts[info[2]].spellID = "No SpellID"
+                    end
+                end
+            }
+            SpellOptionsTable.args.spellList.args[spellName].args.iconSize = {
+                type = "range",
+                name = L["Icon multiplication"],
+                desc = L["Size of the icons."],
+                order = 4,
+                min = 1, max = 3, step = 0.1,
+                get = function(info)
+                    return P.spellOpts[info[2]].increase or P.increase
+                end,
+                set = function(info, val)
+                    P.spellOpts[info[2]].increase = val
 
-	                core:ResetIconSizes()
-	                core:BuildSpellUI()
-	            end
-	        }
+                    core:ResetIconSizes()
+                    core:BuildSpellUI()
+                end
+            }
 
-	        SpellOptionsTable.args.spellList.args[spellName].args.cooldownSize = {
-	            type = "range",
-	            name = L["Cooldown Text Size"],
-	            desc = L["Text size"],
-	            order = 5,
-	            min = 6, max = 20, step = 1,
-	            get = function(info) return P.spellOpts[info[2]].cooldownSize or P.cooldownSize end,
-	            set = function(info, val)
-	                P.spellOpts[info[2]].cooldownSize = val
+            SpellOptionsTable.args.spellList.args[spellName].args.cooldownSize = {
+                type = "range",
+                name = L["Cooldown Text Size"],
+                desc = L["Text size"],
+                order = 5,
+                min = 6, max = 20, step = 1,
+                get = function(info)
+                    return P.spellOpts[info[2]].cooldownSize or P.cooldownSize
+                end,
+                set = function(info, val)
+                    P.spellOpts[info[2]].cooldownSize = val
 
-	                core:ResetCooldownSize()
-	                core:ResetAllPlateIcons()
-	                core:ResetIconSizes()
-	                core:ShowAllKnownSpells()
-	                core:BuildSpellUI()
-	            end
-	        }
+                    core:ResetCooldownSize()
+                    core:ResetAllPlateIcons()
+                    core:ResetIconSizes()
+                    core:ShowAllKnownSpells()
+                    core:BuildSpellUI()
+                end
+            }
 
-	        SpellOptionsTable.args.spellList.args[spellName].args.stackSize = {
-	            type = "range",
-	            name = L["Stack Text Size"],
-	            desc = L["Text size"],
-	            order = 6,
-	            min = 6, max = 20, step = 1,
-	            get = function(info) return P.spellOpts[info[2]].stackSize or P.stackSize end,
-	            set = function(info, val)
-	                P.spellOpts[info[2]].stackSize = val
-	                core:ResetStackSizes()
-	                core:BuildSpellUI()
-	            end
-	        }
+            SpellOptionsTable.args.spellList.args[spellName].args.stackSize = {
+                type = "range",
+                name = L["Stack Text Size"],
+                desc = L["Text size"],
+                order = 6,
+                min = 6, max = 20, step = 1,
+                get = function(info)
+                    return P.spellOpts[info[2]].stackSize or P.stackSize
+                end,
+                set = function(info, val)
+                    P.spellOpts[info[2]].stackSize = val
+                    core:ResetStackSizes()
+                    core:BuildSpellUI()
+                end
+            }
 
-	        if data.when then
-	            SpellOptionsTable.args.spellList.args[spellName].args.addedWhen = {
-	                type = "description",
-	                name = L["Added: "] .. data.when,
-	                order = 7
-	            }
-	        end
+            if data.when then
+                SpellOptionsTable.args.spellList.args[spellName].args.addedWhen = {
+                    type = "description",
+                    name = L["Added: "] .. data.when,
+                    order = 7
+                }
+            end
 
-	        SpellOptionsTable.args.spellList.args[spellName].args.grabID = {
-	            type = "toggle",
-	            name = L["Check SpellID"],
-	            desc = L["Check SpellID"],
-	            order = 8,
-	            get = function(info) return P.spellOpts[info[2]].grabid end,
-	            set = function(info, val)
-	                P.spellOpts[info[2]].grabid = not P.spellOpts[info[2]].grabid
-	            end
-	        }
+            SpellOptionsTable.args.spellList.args[spellName].args.grabID = {
+                type = "toggle",
+                name = L["Check SpellID"],
+                desc = L["Check SpellID"],
+                order = 8,
+                get = function(info)
+                    return P.spellOpts[info[2]].grabid
+                end,
+                set = function(info, val)
+                    P.spellOpts[info[2]].grabid = not P.spellOpts[info[2]].grabid
+                end
+            }
 
-	        SpellOptionsTable.args.spellList.args[spellName].args.removeSpell = {
-	            type = "execute",
-	            order = 100,
-	            name = L["Remove Spell"],
-	            desc = L["Remove spell from list"],
-	            func = function(info) core:RemoveSpell(info[2]) end
-	        }
-	    end
-	end
+            SpellOptionsTable.args.spellList.args[spellName].args.removeSpell = {
+                type = "execute",
+                order = 100,
+                name = L["Remove Spell"],
+                desc = L["Remove spell from list"],
+                func = function(info)
+                    core:RemoveSpell(info[2])
+                end
+            }
+        end
+    end
 end
 
 do
