@@ -19,7 +19,6 @@ local table_sort = table.sort
 local type = type
 local table_getn = table.getn
 local Debug = core.Debug
-local table_getn = table.getn
 local DebuffTypeColor = DebuffTypeColor
 local select = select
 local string_gsub = string.gsub
@@ -98,12 +97,10 @@ end
 local function UpdateBuffSize(frame, size, size2) --
 -- Update a spell frame's texture size. 				--
 ----------------------------------------------------------
-    local k
     local d, d2
     local msqbs = frame.msqborder.bordersize or size
     local msqns = frame.msqborder.normalsize or size
 
-    k = frame.msqborder.bordersize / frame.msqborder.normalsize
     d = (size * frame.msqborder.bordersize) / frame.msqborder.normalsize
     d2 = (size2 * frame.msqborder.bordersize) / frame.msqborder.normalsize
 
@@ -168,11 +165,9 @@ local function iconOnShow(self) --
         if SkinData.Template then
             bordersize = LBF:GetSkin(SkinData.Template).Border.Height
             normalsize = LBF:GetSkin(SkinData.Template).Icon.Height
-            texturecoord = LBF:GetSkin(SkinData.Template).Icon.TexCoords
         else
             bordersize = SkinData.Border.Height
             normalsize = SkinData.Icon.Height
-            texturecoord = SkinData.Icon.TexCoords
         end
 
         ntexture = SkinData.Normal.Texture
@@ -737,13 +732,12 @@ function core:BuildBuffFrame(plate, reset, onlyOne) --
 end
 
 --------------------------------------------------------------
-function core:ResetBarPoint(barFrame, plate, visibleFrame) --
+function core:ResetBarPoint(barFrame, plate) --
 -- Reset a bar's anchor point.								--
 --------------------------------------------------------------
     barFrame:ClearAllPoints()
-    local visibleFrame = plate
-    barFrame:SetParent(visibleFrame)
-    barFrame:SetPoint(P.barAnchorPoint, visibleFrame, P.plateAnchorPoint, P.barOffsetX, P.barOffsetY)
+    barFrame:SetParent(plate)
+    barFrame:SetPoint(P.barAnchorPoint, plate, P.plateAnchorPoint, P.barOffsetX, P.barOffsetY)
 end
 
 --------------------------------------------------------------
@@ -855,7 +849,7 @@ function core:ShowAllKnownSpells() --
 ------------------------------------------------------------------
     local GUID
     for plate in pairs(buffFrames) do
-        local GUID = GetPlateGUID(plate)
+        GUID = GetPlateGUID(plate)
         if GUID then
             self:AddBuffsToPlate(plate, GUID)
         else

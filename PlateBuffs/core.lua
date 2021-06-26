@@ -1,5 +1,5 @@
 --[[
-Author:		Cyprias
+Author:		Cyprias, Kader
 License:	All Rights Reserved
 Contact:	Cyprias on Curse.com or WowAce.com
 ]]
@@ -11,14 +11,15 @@ local Debug = core.Debug
 
 local LibNameplate = LibStub("LibNameplate-1.0", true)
 if not LibNameplate then
-    error(folder .. " requires LibNameplate-1.0.")
-    return
+	error(folder .. " requires LibNameplate-1.0.")
+	return
 end
+local ElvPlates
 
 local LSM = LibStub("LibSharedMedia-3.0")
 if not LSM then
-    error(folder .. " requires LibSharedMedia-3.0.")
-    return
+	error(folder .. " requires LibSharedMedia-3.0.")
+	return
 end
 
 -- local
@@ -35,104 +36,108 @@ core.LSM = LSM
 local L = LibStub("AceLocale-3.0"):GetLocale(folder, true)
 core.L = L
 
-local totemList = { --Nameplates with these names are totems. By default we ignore totem nameplates.
-    2484, --Earthbind Totem
-    8143, --Tremor Totem
-    8177, --Grounding Totem
-    8512, --Windfury Totem
-    6495, --Sentry Totem
-    8170, --Cleansing Totem
-    3738, --Wrath of Air Totem
-    2062, --Earth Elemental Totem
-    2894, --Fire Elemental Totem
-    58734, --Magma Totem
-    58582, --Stoneclaw Totem
-    58753, --Stoneskin Totem
-    58739, --Fire Resistance Totem
-    58656, --Flametongue Totem
-    58745, --Frost Resistance Totem
-    58757, --Healing Stream Totem
-    58774, --Mana Spring Totem
-    58749, --Nature Resistance Totem
-    58704, --Searing Totem
-    58643, --Strength of Earth Totem
-    57722 --Totem of Wrath
+local totemList = {
+	--Nameplates with these names are totems. By default we ignore totem nameplates.
+	2484, --Earthbind Totem
+	8143, --Tremor Totem
+	8177, --Grounding Totem
+	8512, --Windfury Totem
+	6495, --Sentry Totem
+	8170, --Cleansing Totem
+	3738, --Wrath of Air Totem
+	2062, --Earth Elemental Totem
+	2894, --Fire Elemental Totem
+	58734, --Magma Totem
+	58582, --Stoneclaw Totem
+	58753, --Stoneskin Totem
+	58739, --Fire Resistance Totem
+	58656, --Flametongue Totem
+	58745, --Frost Resistance Totem
+	58757, --Healing Stream Totem
+	58774, --Mana Spring Totem
+	58749, --Nature Resistance Totem
+	58704, --Searing Totem
+	58643, --Strength of Earth Totem
+	57722 --Totem of Wrath
 }
 
-local defaultSpells1 = { --Important spells, add them with huge icons.
-    118, --Polymorph
-    51514, --Hex
-    710, --Banish
-    6358, --Seduction
-    6770, --Sap
-    605, --Mind Control
-    33786, --Cyclone
-    5782, --Fear
-    5484, --Howl of Terror
-    6789, --Death Coil
-    45438, --Ice Block
-    642, --Divine Shield
-    8122, --Psychic Scream
-    339, --Entangling Roots
-    23335, -- Silverwing Flag (alliance WSG flag)
-    23333, -- Warsong Flag (horde WSG flag)
-    34976, -- Netherstorm Flag (EotS flag)
-    2094, --Blind
-    33206, --Pain Suppression (priest)
-    29166, --Innervate (druid)
-    47585, --Dispersion (priest)
-    19386 --Wyvern Sting (hunter)
+local defaultSpells1 = {
+	--Important spells, add them with huge icons.
+	118, --Polymorph
+	51514, --Hex
+	710, --Banish
+	6358, --Seduction
+	6770, --Sap
+	605, --Mind Control
+	33786, --Cyclone
+	5782, --Fear
+	5484, --Howl of Terror
+	6789, --Death Coil
+	45438, --Ice Block
+	642, --Divine Shield
+	8122, --Psychic Scream
+	339, --Entangling Roots
+	23335, -- Silverwing Flag (alliance WSG flag)
+	23333, -- Warsong Flag (horde WSG flag)
+	34976, -- Netherstorm Flag (EotS flag)
+	2094, --Blind
+	33206, --Pain Suppression (priest)
+	29166, --Innervate (druid)
+	47585, --Dispersion (priest)
+	19386 --Wyvern Sting (hunter)
 }
 
-local defaultSpells2 = { --semi-important spells, add them with mid size icons.
-    15487, --Silence (priest)
-    10060, --Power Infusion (priest)
-    2825, --Bloodlust
-    5246, --Intimidating Shout (warrior)
-    31224, --Cloak of Shadows (rogue)
-    498, --Divine Protection
-    47476, --Strangulate (warlock)
-    31884, --Avenging Wrath (pally)
-    37587, --Bestial Wrath (hunter)
-    12472, --Icy Veins (mage)
-    49039, --Lichborne (DK)
-    48792, --Icebound Fortitude (DK)
-    5277, --Evasion (rogue)
-    53563, --Beacon of Light (pally)
-    22812, --Barkskin (druid)
-    67867, --Trampled (ToC arena spell when you run over someone)
-    1499, --Freezing Trap
-    2637, --Hibernate
-    64044, --Psychic Horror
-    19503, --Scatter Shot (hunter)
-    34490, --Silencing Shot (hunter)
-    10278, --Hand of Protection (pally)
-    10326, --Turn Evil (pally)
-    44572, --Deep Freeze (mage)
-    20066, --Repentance (pally)
-    46968, --Shockwave (warrior)
-    46924, --Bladestorm (warrior)
-    16689, --Nature's Grasp (Druid)
-    2983, --Sprint (rogue)
-    2335, --Swiftness Potion
-    6624, --Free Action Potion
-    3448, --Lesser Invisibility Potion
-    11464, --Invisibility Potion
-    17634, --Potion of Petrification
-    53905, --Indestructible Potion
-    54221, --Potion of Speed
-    1850 --Dash
+local defaultSpells2 = {
+	--semi-important spells, add them with mid size icons.
+	15487, --Silence (priest)
+	10060, --Power Infusion (priest)
+	2825, --Bloodlust
+	5246, --Intimidating Shout (warrior)
+	31224, --Cloak of Shadows (rogue)
+	498, --Divine Protection
+	47476, --Strangulate (warlock)
+	31884, --Avenging Wrath (pally)
+	37587, --Bestial Wrath (hunter)
+	12472, --Icy Veins (mage)
+	49039, --Lichborne (DK)
+	48792, --Icebound Fortitude (DK)
+	5277, --Evasion (rogue)
+	53563, --Beacon of Light (pally)
+	22812, --Barkskin (druid)
+	67867, --Trampled (ToC arena spell when you run over someone)
+	1499, --Freezing Trap
+	2637, --Hibernate
+	64044, --Psychic Horror
+	19503, --Scatter Shot (hunter)
+	34490, --Silencing Shot (hunter)
+	10278, --Hand of Protection (pally)
+	10326, --Turn Evil (pally)
+	44572, --Deep Freeze (mage)
+	20066, --Repentance (pally)
+	46968, --Shockwave (warrior)
+	46924, --Bladestorm (warrior)
+	16689, --Nature's Grasp (Druid)
+	2983, --Sprint (rogue)
+	2335, --Swiftness Potion
+	6624, --Free Action Potion
+	3448, --Lesser Invisibility Potion
+	11464, --Invisibility Potion
+	17634, --Potion of Petrification
+	53905, --Indestructible Potion
+	54221, --Potion of Speed
+	1850 --Dash
 }
 
-local defaultSpells3 = { -- used to add spell only by name ( no need spellid )
-    5782 -- Fear
+local defaultSpells3 = {
+	-- used to add spell only by name ( no need spellid )
+	5782 -- Fear
 }
 
 local regEvents = {
-    "PLAYER_TARGET_CHANGED",
-    "UPDATE_MOUSEOVER_UNIT",
-    "UNIT_AURA",
-    "UNIT_TARGET"
+	"PLAYER_TARGET_CHANGED",
+	"UPDATE_MOUSEOVER_UNIT",
+	"UNIT_AURA",
+	"UNIT_TARGET"
 }
 
 core.db = {}
@@ -140,16 +145,16 @@ local db
 local P  --db.profile
 
 core.defaultSettings = {
-    profile = {
-        spellOpts = {},
-        ignoreDefaultSpell = {} -- default spells that user has removed. Seems odd but this'll save space in the DB file allowing PB to load faster.
-    }
+	profile = {
+		spellOpts = {},
+		ignoreDefaultSpell = {} -- default spells that user has removed. Seems odd but this'll save space in the DB file allowing PB to load faster.
+	}
 }
 
 core.buffFrames = {}
 core.guidBuffs = {}
 core.nametoGUIDs = {}
- -- w/o servername
+-- w/o servername
 core.buffBars = {}
 
 local buffBars = core.buffBars
@@ -171,528 +176,610 @@ local table_getn = table.getn
 
 local totems = {}
 do
-    local name, texture, _
-    for i = 1, table_getn(totemList) do
-        name, _, texture = GetSpellInfo(totemList[i])
-        --~ 	totems[i] = {name = name, texture = texture}
-        totems[name] = texture
-    end
+	local name, texture, _
+	for i = 1, table_getn(totemList) do
+		name, _, texture = GetSpellInfo(totemList[i])
+		--~ 	totems[i] = {name = name, texture = texture}
+		totems[name] = texture
+	end
 end
 
 --Add default spells to defaultSettings table.
 for i = 1, table_getn(defaultSpells1) do
-    local spellName = GetSpellInfo(defaultSpells1[i])
-    if spellName then
-        core.defaultSettings.profile.spellOpts[spellName] = {
-            spellID = defaultSpells1[i],
-            increase = 2,
-            cooldownSize = 18,
-            show = 1,
-            stackSize = 18
-        }
-    end
+	local spellName = GetSpellInfo(defaultSpells1[i])
+	if spellName then
+		core.defaultSettings.profile.spellOpts[spellName] = {
+			spellID = defaultSpells1[i],
+			increase = 2,
+			cooldownSize = 18,
+			show = 1,
+			stackSize = 18
+		}
+	end
 end
 
 for i = 1, table_getn(defaultSpells2) do
-    local spellName = GetSpellInfo(defaultSpells2[i])
-    if spellName then
-        core.defaultSettings.profile.spellOpts[spellName] = {
-            spellID = defaultSpells2[i],
-            increase = 1.5,
-            cooldownSize = 14,
-            show = 1,
-            stackSize = 14
-        }
-    end
+	local spellName = GetSpellInfo(defaultSpells2[i])
+	if spellName then
+		core.defaultSettings.profile.spellOpts[spellName] = {
+			spellID = defaultSpells2[i],
+			increase = 1.5,
+			cooldownSize = 14,
+			show = 1,
+			stackSize = 14
+		}
+	end
 end
 
 for i = 1, table_getn(defaultSpells3) do
-    local spellName = GetSpellInfo(defaultSpells3[i])
-    if spellName then
-        core.defaultSettings.profile.spellOpts[spellName] = {
-            spellID = "No SpellID",
-            increase = 1.5,
-            cooldownSize = 14,
-            show = 1,
-            stackSize = 14
-        }
-    end
+	local spellName = GetSpellInfo(defaultSpells3[i])
+	if spellName then
+		core.defaultSettings.profile.spellOpts[spellName] = {
+			spellID = "No SpellID",
+			increase = 1.5,
+			cooldownSize = 14,
+			show = 1,
+			stackSize = 14
+		}
+	end
 end
 
 function core:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("PB_DB", core.defaultSettings, true)
-    self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
-    self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
-    self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
-    self.db.RegisterCallback(self, "OnProfileDeleted", "OnProfileChanged")
-    self:RegisterChatCommand("pb", "MySlashProcessorFunc")
+	self.db = LibStub("AceDB-3.0"):New("PB_DB", core.defaultSettings, true)
+	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileDeleted", "OnProfileChanged")
+	self:RegisterChatCommand("pb", "MySlashProcessorFunc")
 
-    self:BuildAboutMenu()
+	self:BuildAboutMenu()
 
-    local config = LibStub("AceConfig-3.0")
-    local dialog = LibStub("AceConfigDialog-3.0")
-    config:RegisterOptionsTable(self.title, self.CoreOptionsTable)
-    dialog:AddToBlizOptions(self.title, self.titleFull)
+	local config = LibStub("AceConfig-3.0")
+	local dialog = LibStub("AceConfigDialog-3.0")
+	config:RegisterOptionsTable(self.title, self.CoreOptionsTable)
+	dialog:AddToBlizOptions(self.title, self.titleFull)
 
-    config:RegisterOptionsTable(self.title .. "Who", self.WhoOptionsTable)
-    dialog:AddToBlizOptions(self.title .. "Who", L["Who"], self.titleFull)
+	config:RegisterOptionsTable(self.title .. "Who", self.WhoOptionsTable)
+	dialog:AddToBlizOptions(self.title .. "Who", L["Who"], self.titleFull)
 
-    config:RegisterOptionsTable(self.title .. "Spells", self.SpellOptionsTable)
-    dialog:AddToBlizOptions(self.title .. "Spells", L["Specific Spells"], self.titleFull)
+	config:RegisterOptionsTable(self.title .. "Spells", self.SpellOptionsTable)
+	dialog:AddToBlizOptions(self.title .. "Spells", L["Specific Spells"], self.titleFull)
 
-    config:RegisterOptionsTable(self.title .. "dSpells", self.DefaultSpellOptionsTable)
-    dialog:AddToBlizOptions(self.title .. "dSpells", L["Default Spells"], self.titleFull)
+	config:RegisterOptionsTable(self.title .. "dSpells", self.DefaultSpellOptionsTable)
+	dialog:AddToBlizOptions(self.title .. "dSpells", L["Default Spells"], self.titleFull)
 
-    config:RegisterOptionsTable(self.title .. "Rows", self.BarOptionsTable)
-    dialog:AddToBlizOptions(self.title .. "Rows", L["Rows"], self.titleFull)
+	config:RegisterOptionsTable(self.title .. "Rows", self.BarOptionsTable)
+	dialog:AddToBlizOptions(self.title .. "Rows", L["Rows"], self.titleFull)
 
-    config:RegisterOptionsTable(self.title .. "About", self.AboutOptionsTable)
-    dialog:AddToBlizOptions(self.title .. "About", L.about, self.titleFull)
+	config:RegisterOptionsTable(self.title .. "About", self.AboutOptionsTable)
+	dialog:AddToBlizOptions(self.title .. "About", L.about, self.titleFull)
 
-    --last UI
-    config:RegisterOptionsTable(self.title .. "Profile", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
-    dialog:AddToBlizOptions(self.title .. "Profile", L["Profiles"], self.titleFull)
+	--last UI
+	config:RegisterOptionsTable(self.title .. "Profile", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
+	dialog:AddToBlizOptions(self.title .. "Profile", L["Profiles"], self.titleFull)
 
-    LSM:Register("font", "Friz Quadrata TT CYR", [[Interface\AddOns\AleaUI\media\FrizQuadrataTT_New.ttf]], LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western)
+	LSM:Register(
+		"font",
+		"Friz Quadrata TT CYR",
+		[[Interface\AddOns\AleaUI\media\FrizQuadrataTT_New.ttf]],
+		LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western
+	)
 end
 
 local function GetPlateName(plate)
-    return LibNameplate:GetName(plate)
+	if ElvPlates then
+		return ElvPlates.UnitName
+	end
+	return LibNameplate:GetName(plate)
 end
 core.GetPlateName = GetPlateName
 
 local function GetPlateType(plate)
-    return LibNameplate:GetType(plate)
+	if ElvPlates and plate and plate.oldHealthBar then
+		local t = select(2, ElvPlates:GetUnitInfo(plate))
+		if t:find("PLAYER") then
+			return "PLAYER"
+		elseif t:find("NPC") then
+			return "NPC"
+		end
+	end
+	return LibNameplate:GetType(plate)
 end
 core.GetPlateType = GetPlateType
 
 local function IsPlateInCombat(plate)
-    return LibNameplate:IsInCombat(plate)
+	return LibNameplate:IsInCombat(plate)
 end
 core.IsPlateInCombat = IsPlateInCombat
 
 local function GetPlateThreat(plate)
-    return LibNameplate:GetThreatSituation(plate)
+	if ElvPlates and plate.Threat then
+		local t = ElvPlates:UnitDetailedThreatSituation(plate)
+		if t == 3 then
+			return "HIGH"
+		elseif t == 2 then
+			return "MEDIUM"
+		else
+			return "LOW"
+		end
+	end
+	return LibNameplate:GetThreatSituation(plate)
 end
 core.GetPlateThreat = GetPlateThreat
 
 local function GetPlateReaction(plate)
-    return LibNameplate:GetReaction(plate)
+	if ElvPlates and plate and plate.oldHealthBar then
+		local r = ElvPlates:GetUnitInfo(plate)
+		if r == 5 then
+			return "FRIENDLY"
+		elseif r == 4 then
+			return "NEUTRAL"
+		else
+			return "HOSTILE"
+		end
+	end
+
+	return LibNameplate:GetReaction(plate)
 end
 core.GetPlateReaction = GetPlateReaction
 
 local function GetPlateGUID(plate)
-    return LibNameplate:GetGUID(plate)
+	if ElvPlates and plate.guid and type(plate.guid) == "string" then
+		return plate.guid
+	end
+
+	return LibNameplate:GetGUID(plate)
 end
 core.GetPlateGUID = GetPlateGUID
 
 local function PlateIsBoss(plate)
-    return LibNameplate:IsBoss(plate)
+	if ElvPlates then
+		local t = ElvPlates:UnitLevel(plate)
+		return (t == "??")
+	end
+
+	return LibNameplate:IsBoss(plate)
 end
 core.PlateIsBoss = PlateIsBoss
 
 local function PlateIsElite(plate)
-    return LibNameplate:IsElite(plate)
+	if ElvPlates and plate.Elite then
+		return plate.Elite:IsShown()
+	end
+
+	return LibNameplate:IsElite(plate)
 end
 core.PlateIsElite = PlateIsElite
 
 local function GetPlateByGUID(guid)
-    return LibNameplate:GetNameplateByGUID(guid)
+	if ElvPlates then
+		return ElvPlates:SearchNameplateByGUID(guid)
+	end
+
+	return LibNameplate:GetNameplateByGUID(guid)
 end
 core.GetPlateByGUID = GetPlateByGUID
 
 local function GetPlateByName(name, maxhp)
-    return LibNameplate:GetNameplateByName(name, maxhp)
+	if ElvPlates then
+		return ElvPlates:SearchNameplateByName(name)
+	end
+
+	return LibNameplate:GetNameplateByName(name, maxhp)
 end
 core.GetPlateByName = GetPlateByName
 
 do
+	local OnEnable = core.OnEnable
+	function core:OnEnable(...)
+		if OnEnable then
+			OnEnable(self, ...)
+		end
 
-    local OnEnable = core.OnEnable
-    function core:OnEnable(...)
-        if OnEnable then OnEnable(self, ...) end
+		db = self.db
+		P = db.profile
 
-        db = self.db
-        P = db.profile
+		for i, event in pairs(regEvents) do
+			self:RegisterEvent(event)
+		end
 
-        for i, event in pairs(regEvents) do
-            self:RegisterEvent(event)
-        end
+		LibNameplate.RegisterCallback(self, "LibNameplate_NewNameplate")
+		LibNameplate.RegisterCallback(self, "LibNameplate_FoundGUID")
+		LibNameplate.RegisterCallback(self, "LibNameplate_RecycleNameplate")
 
-        LibNameplate.RegisterCallback(self, "LibNameplate_NewNameplate")
-        LibNameplate.RegisterCallback(self, "LibNameplate_FoundGUID")
-        LibNameplate.RegisterCallback(self, "LibNameplate_RecycleNameplate")
+		if P.playerCombatWithOnly == true or P.npcCombatWithOnly == true then
+			LibNameplate.RegisterCallback(self, "LibNameplate_CombatChange")
+			LibNameplate.RegisterCallback(self, "LibNameplate_ThreatChange")
+		end
 
-        if P.playerCombatWithOnly == true or P.npcCombatWithOnly == true then
-            LibNameplate.RegisterCallback(self, "LibNameplate_CombatChange")
-            LibNameplate.RegisterCallback(self, "LibNameplate_ThreatChange")
-        end
+		-- Update old options.
+		if P.cooldownSize < 6 then
+			P.cooldownSize = core.defaultSettings.profile.cooldownSize
+		end
+		if P.stackSize < 6 then
+			P.stackSize = core.defaultSettings.profile.stackSize
+		end
 
-        -- Update old options.
-        if P.cooldownSize < 6 then
-            P.cooldownSize = core.defaultSettings.profile.cooldownSize
-        end
-        if P.stackSize < 6 then
-            P.stackSize = core.defaultSettings.profile.stackSize
-        end
+		for plate in pairs(core.buffBars) do
+			for i = 1, table_getn(core.buffBars[plate]) do
+				core.buffBars[plate][i]:Show() --reshow incase user disabled addon.
+			end
+		end
 
-        for plate in pairs(core.buffBars) do
-            for i = 1, table_getn(core.buffBars[plate]) do
-                core.buffBars[plate][i]:Show() --reshow incase user disabled addon.
-            end
-        end
-    end
+		if _G.ElvUI then
+			local e = select(1, unpack(_G.ElvUI))
+			ElvPlates = e:GetModule("NamePlates", true)
+		end
+	end
 end
 
 do
+	local prev_OnDisable = core.OnDisable
+	function core:OnDisable(...)
+		if prev_OnDisable then
+			prev_OnDisable(self, ...)
+		end
 
-    local prev_OnDisable = core.OnDisable
-    function core:OnDisable(...)
-        if prev_OnDisable then
-            prev_OnDisable(self, ...)
-        end
+		LibNameplate.UnregisterAllCallbacks(self)
 
-        LibNameplate.UnregisterAllCallbacks(self)
-
-        for plate in pairs(core.buffBars) do
-            for i = 1, table_getn(core.buffBars[plate]) do
-                core.buffBars[plate][i]:Hide() --makesure all frames stop OnUpdating.
-            end
-        end
-    end
+		for plate in pairs(core.buffBars) do
+			for i = 1, table_getn(core.buffBars[plate]) do
+				core.buffBars[plate][i]:Hide() --makesure all frames stop OnUpdating.
+			end
+		end
+	end
 end
 
 -- User has reset proflie, so we reset our spell exists options.
 function core:OnProfileChanged(...)
 	self:Disable()
-    self:Enable()
+	self:Enable()
 end
-
 
 -- /da function brings up the UI options
 function core:MySlashProcessorFunc(input)
-    InterfaceOptionsFrame_OpenToCategory(self.titleFull)
-    InterfaceOptionsFrame_OpenToCategory(self.titleFull)
+	InterfaceOptionsFrame_OpenToCategory(self.titleFull)
+	InterfaceOptionsFrame_OpenToCategory(self.titleFull)
 end
 
 -- note to self, not buffBars
 function core:HidePlateSpells(plate)
-    if buffFrames[plate] then
-        for i = 1, table_getn(buffFrames[plate]) do
-            buffFrames[plate][i]:Hide()
-        end
-    end
+	if buffFrames[plate] then
+		for i = 1, table_getn(buffFrames[plate]) do
+			buffFrames[plate][i]:Hide()
+		end
+	end
 end
 
 local function isTotem(name)
-    return totems[name]
+	return totems[name]
 end
 
 function core:ShouldAddBuffs(plate, spam)
-    local plateName = GetPlateName(plate) or "UNKNOWN"
+	local plateName = GetPlateName(plate) or "UNKNOWN"
 
-    if P.showTotems == false and isTotem(plateName) then
-        return false
-    end
+	if P.showTotems == false and isTotem(plateName) then
+		return false
+	end
 
-    local plateType = GetPlateType(plate)
-    if (P.abovePlayers == true and plateType == "PLAYER") or (P.aboveNPC == true and plateType == "NPC") then
-        if plateType == "PLAYER" and P.playerCombatWithOnly == true and (not IsPlateInCombat(plate)) then
-            return false
-        end
+	local plateType = GetPlateType(plate)
+	if (P.abovePlayers == true and plateType == "PLAYER") or (P.aboveNPC == true and plateType == "NPC") then
+		if plateType == "PLAYER" and P.playerCombatWithOnly == true and (not IsPlateInCombat(plate)) then
+			return false
+		end
 
-        if plateType == "NPC" and P.npcCombatWithOnly == true and (not IsPlateInCombat(plate) and GetPlateThreat(plate) == "LOW") then
-            return false
-        end
+		if
+			plateType == "NPC" and P.npcCombatWithOnly == true and
+				(not IsPlateInCombat(plate) and GetPlateThreat(plate) == "LOW")
+		 then
+			return false
+		end
 
-        local plateReaction = GetPlateReaction(plate)
-        if P.aboveFriendly == true and plateReaction == "FRIENDLY" then
-            return true
-        elseif P.aboveNeutral == true and plateReaction == "NEUTRAL" then
-            return true
-        elseif P.aboveHostile == true and plateReaction == "HOSTILE" then
-            return true
-        elseif P.aboveTapped == true and plateReaction == "TAPPED" then
-            return true
-        end
-    end
+		local plateReaction = GetPlateReaction(plate)
+		if P.aboveFriendly == true and plateReaction == "FRIENDLY" then
+			return true
+		elseif P.aboveNeutral == true and plateReaction == "NEUTRAL" then
+			return true
+		elseif P.aboveHostile == true and plateReaction == "HOSTILE" then
+			return true
+		elseif P.aboveTapped == true and plateReaction == "TAPPED" then
+			return true
+		end
+	end
 
-    return false
+	return false
 end
 
 function core:AddOurStuffToPlate(plate)
-    local GUID = GetPlateGUID(plate)
-    if GUID then
-        self:RemoveOldSpells(GUID)
-        self:AddBuffsToPlate(plate, GUID)
-        return
-    end
+	local GUID = GetPlateGUID(plate)
+	if GUID then
+		self:RemoveOldSpells(GUID)
+		self:AddBuffsToPlate(plate, GUID)
+		return
+	end
 
-    local plateName = GetPlateName(plate) or "UNKNOWN"
-    if P.saveNameToGUID == true and nametoGUIDs[plateName] and (GetPlateType(plate) == "PLAYER" or PlateIsBoss(plate)) then
-        self:RemoveOldSpells(nametoGUIDs[plateName])
-        self:AddBuffsToPlate(plate, nametoGUIDs[plateName])
-    elseif P.unknownSpellDataIcon == true then
-        self:AddUnknownIcon(plate)
-    end
+	local plateName = GetPlateName(plate) or "UNKNOWN"
+	if P.saveNameToGUID == true and nametoGUIDs[plateName] and (GetPlateType(plate) == "PLAYER" or PlateIsBoss(plate)) then
+		self:RemoveOldSpells(nametoGUIDs[plateName])
+		self:AddBuffsToPlate(plate, nametoGUIDs[plateName])
+	elseif P.unknownSpellDataIcon == true then
+		self:AddUnknownIcon(plate)
+	end
 end
 
 function core:LibNameplate_RecycleNameplate(event, plate)
-    self:HidePlateSpells(plate)
+	self:HidePlateSpells(plate)
 end
 
 function core:LibNameplate_NewNameplate(event, plate)
-    if self:ShouldAddBuffs(plate, true) == true then
-        core:AddOurStuffToPlate(plate)
-    end
+	if self:ShouldAddBuffs(plate, true) == true then
+		core:AddOurStuffToPlate(plate)
+	end
 end
 
 function core:LibNameplate_FoundGUID(event, plate, GUID, unitID)
-    if self:ShouldAddBuffs(plate) == true then
-        if not guidBuffs[GUID] then
-            self:CollectUnitInfo(unitID)
-        end
+	if self:ShouldAddBuffs(plate) == true then
+		if not guidBuffs[GUID] then
+			self:CollectUnitInfo(unitID)
+		end
 
-        self:RemoveOldSpells(GUID)
-        self:AddBuffsToPlate(plate, GUID)
-    end
+		self:RemoveOldSpells(GUID)
+		self:AddBuffsToPlate(plate, GUID)
+	end
 end
 
 function core:HaveSpellOpts(spellName, spellID)
-    if not P.ignoreDefaultSpell[spellName] and P.spellOpts[spellName] then
-        if P.spellOpts[spellName].grabid then
-            if P.spellOpts[spellName].spellID == spellID then
-                return P.spellOpts[spellName]
-            else
-                return false
-            end
-        else
-            return P.spellOpts[spellName]
-        end
-    end
-    return false
+	if not P.ignoreDefaultSpell[spellName] and P.spellOpts[spellName] then
+		if P.spellOpts[spellName].grabid then
+			if P.spellOpts[spellName].spellID == spellID then
+				return P.spellOpts[spellName]
+			else
+				return false
+			end
+		else
+			return P.spellOpts[spellName]
+		end
+	end
+	return false
 end
 
 do
-    local UnitGUID = UnitGUID
-    local UnitName = UnitName
-    local UnitIsPlayer = UnitIsPlayer
-    local UnitClassification = UnitClassification
-    local table_remove = table.remove
-    local table_insert = table.insert
-    local UnitBuff = UnitBuff
-    local UnitDebuff = UnitDebuff
+	local UnitGUID = UnitGUID
+	local UnitName = UnitName
+	local UnitIsPlayer = UnitIsPlayer
+	local UnitClassification = UnitClassification
+	local table_remove = table.remove
+	local table_insert = table.insert
+	local UnitBuff = UnitBuff
+	local UnitDebuff = UnitDebuff
 
-    function core:CollectUnitInfo(unitID)
-        local GUID = UnitGUID(unitID)
-        local unitName = UnitName(unitID)
-        if P.saveNameToGUID == true and UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss" then
-            nametoGUIDs[unitName] = GUID
-        end
+	function core:CollectUnitInfo(unitID)
+		local GUID = UnitGUID(unitID)
+		local unitName = UnitName(unitID)
+		if P.saveNameToGUID == true and UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss" then
+			nametoGUIDs[unitName] = GUID
+		end
 
-        if P.watchUnitIDAuras == true then
-            guidBuffs[GUID] = guidBuffs[GUID] or {}
+		if P.watchUnitIDAuras == true then
+			guidBuffs[GUID] = guidBuffs[GUID] or {}
 
-            --Remove all the entries.
-            for i = table_getn(guidBuffs[GUID]), 1, -1 do
-                table_remove(guidBuffs[GUID], i)
-            end
+			--Remove all the entries.
+			for i = table_getn(guidBuffs[GUID]), 1, -1 do
+				table_remove(guidBuffs[GUID], i)
+			end
 
-            local i = 1
-            local name, icon, count, duration, expirationTime, unitCaster, spellId, debuffType
+			local i = 1
+			local name, icon, count, duration, expirationTime, unitCaster, spellId, debuffType
 
-            while UnitBuff(unitID, i) do
-                name, _, icon, count, _, duration, expirationTime, unitCaster, _, _, spellId = UnitBuff(unitID, i)
-                icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
+			while UnitBuff(unitID, i) do
+				name, _, icon, count, _, duration, expirationTime, unitCaster, _, _, spellId = UnitBuff(unitID, i)
+				icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
 
-                local spellOpts = self:HaveSpellOpts(name, spellId)
-                if spellOpts and spellOpts.show and P.defaultBuffShow ~= 4 then
-                    if spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster and unitCaster == "player") or (spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or (spellOpts.show == 5 and UnitCanAttack("player", unitID)) then
-                        table_insert(guidBuffs[GUID], {
-                            name = name,
-                            icon = icon,
-                            expirationTime = expirationTime,
-                            startTime = expirationTime - duration,
-                            duration = duration,
-                            playerCast = unitCaster and unitCaster == "player" and 1,
-                            stackCount = count,
-                            sID = spellId,
-                            caster = unitCaster and core:GetFullName(unitCaster)
-                        })
-                    end
-                else
-                    if P.defaultBuffShow == 1 or (P.defaultBuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or (P.defaultBuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player")) then
-                        table_insert(guidBuffs[GUID], {
-                            name = name,
-                            icon = icon,
-                            expirationTime = expirationTime,
-                            startTime = expirationTime - duration,
-                            duration = duration,
-                            playerCast = unitCaster and unitCaster == "player" and 1,
-                            stackCount = count,
-                            sID = spellId,
-                            caster = unitCaster and core:GetFullName(unitCaster)
-                        })
-                    end
-                end
+				local spellOpts = self:HaveSpellOpts(name, spellId)
+				if spellOpts and spellOpts.show and P.defaultBuffShow ~= 4 then
+					if
+						spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster and unitCaster == "player") or
+							(spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or
+							(spellOpts.show == 5 and UnitCanAttack("player", unitID))
+					 then
+						table_insert(guidBuffs[GUID], {
+							name = name,
+							icon = icon,
+							expirationTime = expirationTime,
+							startTime = expirationTime - duration,
+							duration = duration,
+							playerCast = unitCaster and unitCaster == "player" and 1,
+							stackCount = count,
+							sID = spellId,
+							caster = unitCaster and core:GetFullName(unitCaster)
+						})
+					end
+				else
+					if
+						P.defaultBuffShow == 1 or
+							(P.defaultBuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or
+							(P.defaultBuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player"))
+					 then
+						table_insert(guidBuffs[GUID], {
+							name = name,
+							icon = icon,
+							expirationTime = expirationTime,
+							startTime = expirationTime - duration,
+							duration = duration,
+							playerCast = unitCaster and unitCaster == "player" and 1,
+							stackCount = count,
+							sID = spellId,
+							caster = unitCaster and core:GetFullName(unitCaster)
+						})
+					end
+				end
 
-                i = i + 1
-            end
+				i = i + 1
+			end
 
-            i = 1
+			i = 1
 			while UnitDebuff(unitID, i) do
-                name, _, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId = UnitDebuff(unitID, i)
-                icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
+				name, _, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId =
+					UnitDebuff(unitID, i)
+				icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
 
-                local spellOpts = self:HaveSpellOpts(name, spellId)
-                if spellOpts and spellOpts.show and P.defaultDebuffShow ~= 4 then
-                    if spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster and unitCaster == "player") or (spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or (spellOpts.show == 5 and UnitCanAttack("player", unitID)) then
-                        table_insert(guidBuffs[GUID], {
-                            name = name,
-                            icon = icon,
-                            expirationTime = expirationTime,
-                            startTime = expirationTime - duration,
-                            duration = duration,
-                            playerCast = unitCaster and unitCaster == "player" and 1,
-                            stackCount = count,
-                            debuffType = debuffType,
-                            isDebuff = true,
-                            sID = spellId,
-                            caster = unitCaster and core:GetFullName(unitCaster)
-                        })
-                    end
-                else
-                    if P.defaultDebuffShow == 1 or (P.defaultDebuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or (P.defaultDebuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player")) then
-                        table_insert(guidBuffs[GUID], {
-                            name = name,
-                            icon = icon,
-                            expirationTime = expirationTime,
-                            startTime = expirationTime - duration,
-                            duration = duration,
-                            playerCast = unitCaster and unitCaster == "player" and 1,
-                            stackCount = count,
-                            debuffType = debuffType,
-                            isDebuff = true,
-                            sID = spellId,
-                            caster = unitCaster and core:GetFullName(unitCaster)
-                        })
-                    end
-                end
-                i = i + 1
-            end
+				local spellOpts = self:HaveSpellOpts(name, spellId)
+				if spellOpts and spellOpts.show and P.defaultDebuffShow ~= 4 then
+					if
+						spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster and unitCaster == "player") or
+							(spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or
+							(spellOpts.show == 5 and UnitCanAttack("player", unitID))
+					 then
+						table_insert(guidBuffs[GUID], {
+							name = name,
+							icon = icon,
+							expirationTime = expirationTime,
+							startTime = expirationTime - duration,
+							duration = duration,
+							playerCast = unitCaster and unitCaster == "player" and 1,
+							stackCount = count,
+							debuffType = debuffType,
+							isDebuff = true,
+							sID = spellId,
+							caster = unitCaster and core:GetFullName(unitCaster)
+						})
+					end
+				else
+					if
+						P.defaultDebuffShow == 1 or
+							(P.defaultDebuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or
+							(P.defaultDebuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player"))
+					 then
+						table_insert(guidBuffs[GUID], {
+							name = name,
+							icon = icon,
+							expirationTime = expirationTime,
+							startTime = expirationTime - duration,
+							duration = duration,
+							playerCast = unitCaster and unitCaster == "player" and 1,
+							stackCount = count,
+							debuffType = debuffType,
+							isDebuff = true,
+							sID = spellId,
+							caster = unitCaster and core:GetFullName(unitCaster)
+						})
+					end
+				end
+				i = i + 1
+			end
 
-            if core.iconTestMode == true then
-                for j = table_getn(guidBuffs[GUID]), 1, -1 do
-                    for t = 1, P.iconsPerBar - 1 do
-                        table_insert(guidBuffs[GUID], j, guidBuffs[GUID][j]) --reinsert the entry abunch of times.
-                    end
-                end
-            end
-        end
+			if core.iconTestMode == true then
+				for j = table_getn(guidBuffs[GUID]), 1, -1 do
+					for t = 1, P.iconsPerBar - 1 do
+						table_insert(guidBuffs[GUID], j, guidBuffs[GUID][j]) --reinsert the entry abunch of times.
+					end
+				end
+			end
+		end
 
-        if not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
-            name = UnitName(unitID)
-            -- LibNameplate can't find a nameplate that matches that GUID. Since the unitID's a player/worldboss which have unique names, add buffs to the frame that matches that name.
-            -- Note, this /can/ add buffs to the wrong frame if a hunter pet has the same name as a player. This is so rare that I'll risk it.
-            self:UpdatePlateByName(name)
-        end
-    end
+		if not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
+			name = UnitName(unitID)
+			-- LibNameplate can't find a nameplate that matches that GUID. Since the unitID's a player/worldboss which have unique names, add buffs to the frame that matches that name.
+			-- Note, this /can/ add buffs to the wrong frame if a hunter pet has the same name as a player. This is so rare that I'll risk it.
+			self:UpdatePlateByName(name)
+		end
+	end
 end
 
 function core:PLAYER_TARGET_CHANGED(event, ...)
-    if UnitExists("target") then
-        self:CollectUnitInfo("target")
-    end
+	if UnitExists("target") then
+		self:CollectUnitInfo("target")
+	end
 end
 
 function core:UNIT_TARGET(event, unitID)
-    if not UnitIsUnit(unitID, "player") and UnitExists(unitID .. "target") then
-        self:CollectUnitInfo(unitID .. "target")
-    end
+	if not UnitIsUnit(unitID, "player") and UnitExists(unitID .. "target") then
+		self:CollectUnitInfo(unitID .. "target")
+	end
 end
 
 function core:LibNameplate_CombatChange(event, plate, inCombat)
-    if core:ShouldAddBuffs(plate) == true then
-        core:AddOurStuffToPlate(plate)
-    else
-        core:HidePlateSpells(plate)
-    end
+	if core:ShouldAddBuffs(plate) == true then
+		core:AddOurStuffToPlate(plate)
+	else
+		core:HidePlateSpells(plate)
+	end
 end
 
 function core:LibNameplate_ThreatChange(event, plate, threatSit)
-    if core:ShouldAddBuffs(plate) == true then
-        core:AddOurStuffToPlate(plate)
-    else
-        core:HidePlateSpells(plate)
-    end
+	if core:ShouldAddBuffs(plate) == true then
+		core:AddOurStuffToPlate(plate)
+	else
+		core:HidePlateSpells(plate)
+	end
 end
 
 function core:UPDATE_MOUSEOVER_UNIT(event, ...)
-    if UnitExists("mouseover") then
-        self:CollectUnitInfo("mouseover")
-    end
+	if UnitExists("mouseover") then
+		self:CollectUnitInfo("mouseover")
+	end
 end
 
 function core:UNIT_AURA(event, unitID)
-    if UnitExists(unitID) then
-        self:CollectUnitInfo(unitID)
-    end
+	if UnitExists(unitID) then
+		self:CollectUnitInfo(unitID)
+	end
 end
 
 function core:AddNewSpell(spellName, spellID)
-    Debug("AddNewSpell", spellName, spellID)
-    P.ignoreDefaultSpell[spellName] = nil
-    P.spellOpts[spellName] = {show = 1, spellID = spellID}
-    self:BuildSpellUI()
+	Debug("AddNewSpell", spellName, spellID)
+	P.ignoreDefaultSpell[spellName] = nil
+	P.spellOpts[spellName] = {show = 1, spellID = spellID}
+	self:BuildSpellUI()
 end
 
 function core:RemoveSpell(spellName)
-    if self.defaultSettings.profile.spellOpts[spellName] then
-        P.ignoreDefaultSpell[spellName] = true
-    end
-    P.spellOpts[spellName] = nil
-    core:BuildSpellUI()
+	if self.defaultSettings.profile.spellOpts[spellName] then
+		P.ignoreDefaultSpell[spellName] = true
+	end
+	P.spellOpts[spellName] = nil
+	core:BuildSpellUI()
 end
 
 function core:UpdatePlateByGUID(GUID)
-    local plate = GetPlateByGUID(GUID)
-    if plate and self:ShouldAddBuffs(plate) == true then
-        core:AddBuffsToPlate(plate, GUID)
-        return true
-    end
-    return false
+	local plate = GetPlateByGUID(GUID)
+	if plate and self:ShouldAddBuffs(plate) == true then
+		core:AddBuffsToPlate(plate, GUID)
+		return true
+	end
+	return false
 end
 
 -- This will add buff frames to a frame matching a given name.
 -- This should only be used for player names because mobs/npcs can share the same name.
 function core:UpdatePlateByName(name)
-    local GUID = nametoGUIDs[name]
-    if GUID then
-        local plate = GetPlateByName(name)
-        if plate and self:ShouldAddBuffs(plate) == true then
+	local GUID = nametoGUIDs[name]
+	if GUID then
+		local plate = GetPlateByName(name)
+		if plate and self:ShouldAddBuffs(plate) == true then
 			core:AddBuffsToPlate(plate, GUID)
-            return true
-        end
-    end
+			return true
+		end
+	end
 end
 
 function core:GetAllSpellIDs()
 	local spells, name = {}, nil
 
-    for i, spellID in pairs(defaultSpells1) do
-        name = select(1, GetSpellInfo(spellID))
-        spells[name] = spellID
-    end
-    for i, spellID in pairs(defaultSpells2) do
-        name = select(1, GetSpellInfo(spellID))
-        spells[name] = spellID
-    end
+	for i, spellID in pairs(defaultSpells1) do
+		name = select(1, GetSpellInfo(spellID))
+		spells[name] = spellID
+	end
+	for i, spellID in pairs(defaultSpells2) do
+		name = select(1, GetSpellInfo(spellID))
+		spells[name] = spellID
+	end
 
-    for i = 76567, 1, -1 do --76567
-        name = select(1, GetSpellInfo(i))
-        if name and not spells[name] then
-            spells[name] = i
-        end
-    end
-    return spells
+	for i = 76567, 1, -1 do --76567
+		name = select(1, GetSpellInfo(i))
+		if name and not spells[name] then
+			spells[name] = i
+		end
+	end
+	return spells
 end

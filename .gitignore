@@ -1,4 +1,5 @@
-.luacheckrc
-luacheck.exe
+_dev
 Makefile
 *.zip
+*.sublime-*
+*.sublime-*

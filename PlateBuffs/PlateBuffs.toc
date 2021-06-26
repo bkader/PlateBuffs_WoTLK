@@ -1,16 +1,16 @@
 ## Interface: 30300
 ## X-Compatible-With: 30300
 ## Title: Plate Buffs
-## Version: 1.18.1 (r229)
+## Version: 1.18.2 (r230)
 ## Notes: Show buffs on nameplates.
 ## Author: Cyprias (Kader Backport)
 ## SavedVariables: PB_DB
 ## OptionalDeps: LibStub, CallbackHandler-1.0, LibNameplate-1.0
-## X-Curse-Packaged-Version: r229
+## X-Curse-Packaged-Version: r230
 ## X-Curse-Project-Name: PlateBuffs
 ## X-Curse-Project-ID: platebuffs
 ## X-Curse-Repository-ID: wow/platebuffs/mainline
-## X-Curse-Packaged-Version: r229
+## X-Curse-Packaged-Version: r230
 ## X-Curse-Project-Name: PlateBuffs
 ## X-Curse-Project-ID: platebuffs
 ## X-Curse-Repository-ID: wow/platebuffs/mainline
