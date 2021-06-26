@@ -615,10 +615,10 @@ core.DefaultSpellOptionsTable = {
         },
         intervalX = {
             type = "range",
-            name = L["Interval Y"],
+            name = L["Interval X"],
             desc = L["Change interval between icons."],
             order = 4,
-            min = 2, max = 80, step = 1,
+            min = 0, max = 80, step = 1,
             set = function(info, val)
                 P.intervalX = val
                 core:ResetIconSizes()
@@ -626,10 +626,10 @@ core.DefaultSpellOptionsTable = {
         },
         intervalY = {
             type = "range",
-            name = L["Interval X"],
+            name = L["Interval Y"],
             desc = L["Change interval between icons."],
             order = 5,
-            min = 2, max = 80, step = 1,
+            min = 0, max = 80, step = 1,
             set = function(info, val)
                 P.intervalY = val
                 core:ResetIconSizes()
