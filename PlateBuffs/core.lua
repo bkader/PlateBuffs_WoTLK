@@ -9,9 +9,9 @@ LibStub("AceAddon-3.0"):NewAddon(core, folder, "AceConsole-3.0", "AceEvent-3.0")
 -- global lookup
 local Debug = core.Debug
 
-local LibNameplate = LibStub("LibNameplate-1.0", true)
-if not LibNameplate then
-	error(folder .. " requires LibNameplate-1.0.")
+local LibNameplates = LibStub("LibNameplates-1.0", true)
+if not LibNameplates then
+	error(folder .. " requires LibNameplates-1.0.")
 	return
 end
 
@@ -27,7 +27,7 @@ core.version = GetAddOnMetadata(folder, "X-Curse-Packaged-Version") or ""
 core.titleFull = core.title .. " " .. core.version
 core.addonDir = "Interface\\AddOns\\" .. folder .. "\\"
 
-core.LibNameplate = LibNameplate
+core.LibNameplates = LibNameplates
 core.LSM = LSM
 
 local L = LibStub("AceLocale-3.0"):GetLocale(folder, true)
@@ -263,52 +263,52 @@ function core:OnInitialize()
 end
 
 local function GetPlateName(plate)
-	return LibNameplate:GetName(plate)
+	return LibNameplates:GetName(plate)
 end
 core.GetPlateName = GetPlateName
 
 local function GetPlateType(plate)
-	return LibNameplate:GetType(plate)
+	return LibNameplates:GetType(plate)
 end
 core.GetPlateType = GetPlateType
 
 local function IsPlateInCombat(plate)
-	return LibNameplate:IsInCombat(plate)
+	return LibNameplates:IsInCombat(plate)
 end
 core.IsPlateInCombat = IsPlateInCombat
 
 local function GetPlateThreat(plate)
-	return LibNameplate:GetThreatSituation(plate)
+	return LibNameplates:GetThreatSituation(plate)
 end
 core.GetPlateThreat = GetPlateThreat
 
 local function GetPlateReaction(plate)
-	return LibNameplate:GetReaction(plate)
+	return LibNameplates:GetReaction(plate)
 end
 core.GetPlateReaction = GetPlateReaction
 
 local function GetPlateGUID(plate)
-	return LibNameplate:GetGUID(plate)
+	return LibNameplates:GetGUID(plate)
 end
 core.GetPlateGUID = GetPlateGUID
 
 local function PlateIsBoss(plate)
-	return LibNameplate:IsBoss(plate)
+	return LibNameplates:IsBoss(plate)
 end
 core.PlateIsBoss = PlateIsBoss
 
 local function PlateIsElite(plate)
-	return LibNameplate:IsElite(plate)
+	return LibNameplates:IsElite(plate)
 end
 core.PlateIsElite = PlateIsElite
 
 local function GetPlateByGUID(guid)
-	return LibNameplate:GetNameplateByGUID(guid)
+	return LibNameplates:GetNameplateByGUID(guid)
 end
 core.GetPlateByGUID = GetPlateByGUID
 
 local function GetPlateByName(name, maxhp)
-	return LibNameplate:GetNameplateByName(name, maxhp)
+	return LibNameplates:GetNameplateByName(name, maxhp)
 end
 core.GetPlateByName = GetPlateByName
 
@@ -326,13 +326,13 @@ do
 			self:RegisterEvent(event)
 		end
 
-		LibNameplate.RegisterCallback(self, "LibNameplate_NewNameplate")
-		LibNameplate.RegisterCallback(self, "LibNameplate_FoundGUID")
-		LibNameplate.RegisterCallback(self, "LibNameplate_RecycleNameplate")
+		LibNameplates.RegisterCallback(self, "LibNameplates_NewNameplate")
+		LibNameplates.RegisterCallback(self, "LibNameplates_FoundGUID")
+		LibNameplates.RegisterCallback(self, "LibNameplates_RecycleNameplate")
 
 		if P.playerCombatWithOnly == true or P.npcCombatWithOnly == true then
-			LibNameplate.RegisterCallback(self, "LibNameplate_CombatChange")
-			LibNameplate.RegisterCallback(self, "LibNameplate_ThreatChange")
+			LibNameplates.RegisterCallback(self, "LibNameplates_CombatChange")
+			LibNameplates.RegisterCallback(self, "LibNameplates_ThreatChange")
 		end
 
 		-- Update old options.
@@ -358,7 +358,7 @@ do
 			prev_OnDisable(self, ...)
 		end
 
-		LibNameplate.UnregisterAllCallbacks(self)
+		LibNameplates.UnregisterAllCallbacks(self)
 
 		for plate in pairs(core.buffBars) do
 			for i = 1, table_getn(core.buffBars[plate]) do
@@ -442,17 +442,17 @@ function core:AddOurStuffToPlate(plate)
 	end
 end
 
-function core:LibNameplate_RecycleNameplate(event, plate)
+function core:LibNameplates_RecycleNameplate(event, plate)
 	self:HidePlateSpells(plate)
 end
 
-function core:LibNameplate_NewNameplate(event, plate)
+function core:LibNameplates_NewNameplate(event, plate)
 	if self:ShouldAddBuffs(plate) == true then
 		core:AddOurStuffToPlate(plate)
 	end
 end
 
-function core:LibNameplate_FoundGUID(event, plate, GUID, unitID)
+function core:LibNameplates_FoundGUID(event, plate, GUID, unitID)
 	if self:ShouldAddBuffs(plate) == true then
 		if not guidBuffs[GUID] then
 			self:CollectUnitInfo(unitID)
@@ -596,7 +596,7 @@ do
 		end
 
 		if not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
-			-- LibNameplate can't find a nameplate that matches that GUID. Since the unitID's a player/worldboss which have unique names, add buffs to the frame that matches that name.
+			-- LibNameplates can't find a nameplate that matches that GUID. Since the unitID's a player/worldboss which have unique names, add buffs to the frame that matches that name.
 			-- Note, this /can/ add buffs to the wrong frame if a hunter pet has the same name as a player. This is so rare that I'll risk it.
 			self:UpdatePlateByName(unitName)
 		end
@@ -615,7 +615,7 @@ function core:UNIT_TARGET(event, unitID)
 	end
 end
 
-function core:LibNameplate_CombatChange(event, plate, inCombat)
+function core:LibNameplates_CombatChange(event, plate, inCombat)
 	if core:ShouldAddBuffs(plate) == true then
 		core:AddOurStuffToPlate(plate)
 	else
@@ -623,7 +623,7 @@ function core:LibNameplate_CombatChange(event, plate, inCombat)
 	end
 end
 
-function core:LibNameplate_ThreatChange(event, plate, threatSit)
+function core:LibNameplates_ThreatChange(event, plate, threatSit)
 	if core:ShouldAddBuffs(plate) == true then
 		core:AddOurStuffToPlate(plate)
 	else

@@ -1,6 +1,6 @@
 local folder, core = ...
 
-if not core.LibNameplate then
+if not core.LibNameplates then
 	return
 end
 

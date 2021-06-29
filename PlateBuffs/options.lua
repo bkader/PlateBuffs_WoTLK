@@ -1,6 +1,6 @@
 local folder, core = ...
 
-if not core.LibNameplate then return end
+if not core.LibNameplates then return end
 
 --Globals
 local _G = _G
