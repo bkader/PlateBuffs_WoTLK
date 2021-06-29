@@ -28,7 +28,7 @@ local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local tonumber = tonumber
 local strsplit = strsplit
 
-local MAJOR, MINOR = "LibAuraInfo-1.0", 6
+local MAJOR, MINOR = "LibAuraInfo-1.0", 7
 if not LibStub then error(MAJOR .. " requires LibStub.") return end
 
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
@@ -77,6 +77,12 @@ function lib.callbacks:OnUsed(target, eventname)
 	table_insert(lib.callbacksUsed[eventname], #lib.callbacksUsed[eventname]+1, target)
 	lib.trackAuras = true
 	lib.frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+	
+	lib.frame:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
+	lib.frame:RegisterEvent('PLAYER_TARGET_CHANGED')
+	lib.frame:RegisterEvent('UNIT_TARGET')
+	lib.frame:RegisterEvent('UNIT_AURA')
+--~ 	debugPrint("OnUsed", eventName)
 end
 
 function lib.callbacks:OnUnused(target, eventname)
@@ -100,6 +106,12 @@ function lib.callbacks:OnUnused(target, eventname)
 	end
 	lib.trackAuras = false
 	lib.frame:UnregisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+	
+	lib.frame:UnregisterEvent('UPDATE_MOUSEOVER_UNIT')
+	lib.frame:UnregisterEvent('PLAYER_TARGET_CHANGED')
+	lib.frame:UnregisterEvent('UNIT_TARGET')
+	lib.frame:UnregisterEvent('UNIT_AURA')
+--~ 	debugPrint("OnUnused", eventName)
 end
 
 
@@ -264,10 +276,6 @@ function lib.frame:ADDON_LOADED()
 	LAI_DB = _G.LAI_DB or {needConfirm = {}, new = {}}
 	self:RegisterEvent('PLAYER_LOGOUT')
 	--@end-debug@]===]
-	self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
-	self:RegisterEvent('PLAYER_TARGET_CHANGED')
-	self:RegisterEvent('UNIT_TARGET')
-	self:RegisterEvent('UNIT_AURA')
 end
 
 function lib.frame:PLAYER_LOGIN()

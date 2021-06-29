@@ -14,7 +14,6 @@ if not LibNameplate then
 	error(folder .. " requires LibNameplate-1.0.")
 	return
 end
-local ElvPlates
 
 local LSM = LibStub("LibSharedMedia-3.0")
 if not LSM then
@@ -31,13 +30,11 @@ core.addonDir = "Interface\\AddOns\\" .. folder .. "\\"
 core.LibNameplate = LibNameplate
 core.LSM = LSM
 
---~ L = LibStub("AceLocale-3.0"):GetLocale(folder, true)
-
 local L = LibStub("AceLocale-3.0"):GetLocale(folder, true)
 core.L = L
 
+-- Nameplates with these names are totems. By default we ignore totem nameplates.
 local totemList = {
-	--Nameplates with these names are totems. By default we ignore totem nameplates.
 	2484, --Earthbind Totem
 	8143, --Tremor Totem
 	8177, --Grounding Totem
@@ -61,8 +58,8 @@ local totemList = {
 	57722 --Totem of Wrath
 }
 
+-- Important spells, add them with huge icons.
 local defaultSpells1 = {
-	--Important spells, add them with huge icons.
 	118, --Polymorph
 	51514, --Hex
 	710, --Banish
@@ -87,8 +84,8 @@ local defaultSpells1 = {
 	19386 --Wyvern Sting (hunter)
 }
 
+-- semi-important spells, add them with mid size icons.
 local defaultSpells2 = {
-	--semi-important spells, add them with mid size icons.
 	15487, --Silence (priest)
 	10060, --Power Infusion (priest)
 	2825, --Bloodlust
@@ -128,8 +125,8 @@ local defaultSpells2 = {
 	1850 --Dash
 }
 
+-- used to add spell only by name ( no need spellid )
 local defaultSpells3 = {
-	-- used to add spell only by name ( no need spellid )
 	5782 -- Fear
 }
 
@@ -179,7 +176,6 @@ do
 	local name, texture, _
 	for i = 1, table_getn(totemList) do
 		name, _, texture = GetSpellInfo(totemList[i])
-		--~ 	totems[i] = {name = name, texture = texture}
 		totems[name] = texture
 	end
 end
@@ -267,22 +263,11 @@ function core:OnInitialize()
 end
 
 local function GetPlateName(plate)
-	if ElvPlates then
-		return ElvPlates.UnitName
-	end
 	return LibNameplate:GetName(plate)
 end
 core.GetPlateName = GetPlateName
 
 local function GetPlateType(plate)
-	if ElvPlates and plate and plate.oldHealthBar then
-		local t = select(2, ElvPlates:GetUnitInfo(plate))
-		if t:find("PLAYER") then
-			return "PLAYER"
-		elseif t:find("NPC") then
-			return "NPC"
-		end
-	end
 	return LibNameplate:GetType(plate)
 end
 core.GetPlateType = GetPlateType
@@ -293,78 +278,36 @@ end
 core.IsPlateInCombat = IsPlateInCombat
 
 local function GetPlateThreat(plate)
-	if ElvPlates and plate.Threat then
-		local t = ElvPlates:UnitDetailedThreatSituation(plate)
-		if t == 3 then
-			return "HIGH"
-		elseif t == 2 then
-			return "MEDIUM"
-		else
-			return "LOW"
-		end
-	end
 	return LibNameplate:GetThreatSituation(plate)
 end
 core.GetPlateThreat = GetPlateThreat
 
 local function GetPlateReaction(plate)
-	if ElvPlates and plate and plate.oldHealthBar then
-		local r = ElvPlates:GetUnitInfo(plate)
-		if r == 5 then
-			return "FRIENDLY"
-		elseif r == 4 then
-			return "NEUTRAL"
-		else
-			return "HOSTILE"
-		end
-	end
-
 	return LibNameplate:GetReaction(plate)
 end
 core.GetPlateReaction = GetPlateReaction
 
 local function GetPlateGUID(plate)
-	if ElvPlates and plate.guid and type(plate.guid) == "string" then
-		return plate.guid
-	end
-
 	return LibNameplate:GetGUID(plate)
 end
 core.GetPlateGUID = GetPlateGUID
 
 local function PlateIsBoss(plate)
-	if ElvPlates then
-		local t = ElvPlates:UnitLevel(plate)
-		return (t == "??")
-	end
-
 	return LibNameplate:IsBoss(plate)
 end
 core.PlateIsBoss = PlateIsBoss
 
 local function PlateIsElite(plate)
-	if ElvPlates and plate.Elite then
-		return plate.Elite:IsShown()
-	end
-
 	return LibNameplate:IsElite(plate)
 end
 core.PlateIsElite = PlateIsElite
 
 local function GetPlateByGUID(guid)
-	if ElvPlates then
-		return ElvPlates:SearchNameplateByGUID(guid)
-	end
-
 	return LibNameplate:GetNameplateByGUID(guid)
 end
 core.GetPlateByGUID = GetPlateByGUID
 
 local function GetPlateByName(name, maxhp)
-	if ElvPlates then
-		return ElvPlates:SearchNameplateByName(name)
-	end
-
 	return LibNameplate:GetNameplateByName(name, maxhp)
 end
 core.GetPlateByName = GetPlateByName
@@ -404,11 +347,6 @@ do
 			for i = 1, table_getn(core.buffBars[plate]) do
 				core.buffBars[plate][i]:Show() --reshow incase user disabled addon.
 			end
-		end
-
-		if _G.ElvUI then
-			local e = select(1, unpack(_G.ElvUI))
-			ElvPlates = e:GetModule("NamePlates", true)
 		end
 	end
 end
@@ -455,7 +393,7 @@ local function isTotem(name)
 	return totems[name]
 end
 
-function core:ShouldAddBuffs(plate, spam)
+function core:ShouldAddBuffs(plate)
 	local plateName = GetPlateName(plate) or "UNKNOWN"
 
 	if P.showTotems == false and isTotem(plateName) then
@@ -468,10 +406,7 @@ function core:ShouldAddBuffs(plate, spam)
 			return false
 		end
 
-		if
-			plateType == "NPC" and P.npcCombatWithOnly == true and
-				(not IsPlateInCombat(plate) and GetPlateThreat(plate) == "LOW")
-		 then
+		if plateType == "NPC" and P.npcCombatWithOnly == true and (not IsPlateInCombat(plate) and GetPlateThreat(plate) == "LOW") then
 			return false
 		end
 
@@ -512,7 +447,7 @@ function core:LibNameplate_RecycleNameplate(event, plate)
 end
 
 function core:LibNameplate_NewNameplate(event, plate)
-	if self:ShouldAddBuffs(plate, true) == true then
+	if self:ShouldAddBuffs(plate) == true then
 		core:AddOurStuffToPlate(plate)
 	end
 end
@@ -573,40 +508,32 @@ do
 
 			while UnitBuff(unitID, i) do
 				name, _, icon, count, _, duration, expirationTime, unitCaster, _, _, spellId = UnitBuff(unitID, i)
-				icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
+				icon = icon:upper():gsub("(.+)\\(.+)\\", "")
 
 				local spellOpts = self:HaveSpellOpts(name, spellId)
 				if spellOpts and spellOpts.show and P.defaultBuffShow ~= 4 then
-					if
-						spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster and unitCaster == "player") or
-							(spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or
-							(spellOpts.show == 5 and UnitCanAttack("player", unitID))
-					 then
+					if spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster == "player") or (spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or (spellOpts.show == 5 and UnitCanAttack("player", unitID)) then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
 							expirationTime = expirationTime,
 							startTime = expirationTime - duration,
 							duration = duration,
-							playerCast = unitCaster and unitCaster == "player" and 1,
+							playerCast = (unitCaster == "player") and 1,
 							stackCount = count,
 							sID = spellId,
 							caster = unitCaster and core:GetFullName(unitCaster)
 						})
 					end
 				else
-					if
-						P.defaultBuffShow == 1 or
-							(P.defaultBuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or
-							(P.defaultBuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player"))
-					 then
+					if P.defaultBuffShow == 1 or (P.defaultBuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or (P.defaultBuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player")) then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
 							expirationTime = expirationTime,
 							startTime = expirationTime - duration,
 							duration = duration,
-							playerCast = unitCaster and unitCaster == "player" and 1,
+							playerCast = (unitCaster == "player") and 1,
 							stackCount = count,
 							sID = spellId,
 							caster = unitCaster and core:GetFullName(unitCaster)
@@ -619,24 +546,19 @@ do
 
 			i = 1
 			while UnitDebuff(unitID, i) do
-				name, _, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId =
-					UnitDebuff(unitID, i)
+				name, _, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId = UnitDebuff(unitID, i)
 				icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
 
 				local spellOpts = self:HaveSpellOpts(name, spellId)
 				if spellOpts and spellOpts.show and P.defaultDebuffShow ~= 4 then
-					if
-						spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster and unitCaster == "player") or
-							(spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or
-							(spellOpts.show == 5 and UnitCanAttack("player", unitID))
-					 then
+					if spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster == "player") or (spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or (spellOpts.show == 5 and UnitCanAttack("player", unitID)) then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
 							expirationTime = expirationTime,
 							startTime = expirationTime - duration,
 							duration = duration,
-							playerCast = unitCaster and unitCaster == "player" and 1,
+							playerCast = (unitCaster == "player") and 1,
 							stackCount = count,
 							debuffType = debuffType,
 							isDebuff = true,
@@ -645,18 +567,14 @@ do
 						})
 					end
 				else
-					if
-						P.defaultDebuffShow == 1 or
-							(P.defaultDebuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or
-							(P.defaultDebuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player"))
-					 then
+					if P.defaultDebuffShow == 1 or (P.defaultDebuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or (P.defaultDebuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player")) then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
 							expirationTime = expirationTime,
 							startTime = expirationTime - duration,
 							duration = duration,
-							playerCast = unitCaster and unitCaster == "player" and 1,
+							playerCast = (unitCaster == "player") and 1,
 							stackCount = count,
 							debuffType = debuffType,
 							isDebuff = true,
@@ -678,10 +596,9 @@ do
 		end
 
 		if not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
-			name = UnitName(unitID)
 			-- LibNameplate can't find a nameplate that matches that GUID. Since the unitID's a player/worldboss which have unique names, add buffs to the frame that matches that name.
 			-- Note, this /can/ add buffs to the wrong frame if a hunter pet has the same name as a player. This is so rare that I'll risk it.
-			self:UpdatePlateByName(name)
+			self:UpdatePlateByName(unitName)
 		end
 	end
 end
@@ -767,16 +684,16 @@ function core:GetAllSpellIDs()
 	local spells, name = {}, nil
 
 	for i, spellID in pairs(defaultSpells1) do
-		name = select(1, GetSpellInfo(spellID))
+		name = GetSpellInfo(spellID)
 		spells[name] = spellID
 	end
 	for i, spellID in pairs(defaultSpells2) do
-		name = select(1, GetSpellInfo(spellID))
+		name = GetSpellInfo(spellID)
 		spells[name] = spellID
 	end
 
 	for i = 76567, 1, -1 do --76567
-		name = select(1, GetSpellInfo(i))
+		name = GetSpellInfo(i)
 		if name and not spells[name] then
 			spells[name] = i
 		end
