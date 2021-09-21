@@ -220,6 +220,8 @@ for i = 1, table_getn(defaultSpells3) do
 	end
 end
 
+core.Dummy = function() end
+
 function core:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("PB_DB", core.defaultSettings, true)
 	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
@@ -699,4 +701,11 @@ function core:GetAllSpellIDs()
 		end
 	end
 	return spells
+end
+
+function core:SkinCallback(skin, glossAlpha, gloss, _, _, colors)
+	self.db.profile.skin_SkinID = skin
+	self.db.profile.skin_Gloss = glossAlpha
+	self.db.profile.skin_Backdrop = gloss
+	self.db.profile.skin_Colors = colors
 end

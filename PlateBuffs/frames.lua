@@ -4,7 +4,7 @@ if not core.LibNameplates then
 	return
 end
 
-local LBF = LibStub("LibButtonFacade", true)
+local MSQ
 
 local Testreversepos = false
 
@@ -52,23 +52,14 @@ local GetPlateByName = core.GetPlateByName
 -------------------
 
 do
-	local OnEnable = core.OnEnable
+	local OnEnable = core.OnEnable or core.noop
 	function core:OnEnable()
-		if OnEnable then
-			OnEnable(self)
-		end
-
+		OnEnable(self)
 		P = self.db.profile --this can change on profile change.
-
-		if LBF then
-			LBF:RegisterSkinCallback(folder, self.SkinCallback, self)
-
-			LBF:Group(self.name):Skin(
-				self.db.profile.skin_SkinID,
-				self.db.profile.skin_Gloss,
-				self.db.profile.skin_Backdrop,
-				self.db.profile.skin_Colors
-			)
+		MSQ = MSQ or LibStub("Masque", true) or LibStub("LibButtonFacade", true)
+		if MSQ then
+			MSQ:RegisterSkinCallback(folder, self.SkinCallback, self)
+			MSQ:Group(folder):Skin(self.db.profile.skin_SkinID, self.db.profile.skin_Gloss, self.db.profile.skin_Backdrop, self.db.profile.skin_Colors)
 		end
 	end
 end
@@ -114,7 +105,7 @@ local function UpdateBuffSize(frame, size, size2)
 	frame.icon:SetWidth(size)
 	frame.icon:SetHeight(size2)
 	GetTexCoordFromSize(frame.texture, size, size2)
-	frame:SetWidth(size + P.intervalX) --ic+2
+	frame:SetWidth(size + P.intervalX)
 
 	if P.showCooldown == true then
 		frame:SetHeight(size2 + P.cooldownSize + P.intervalY)
@@ -124,18 +115,18 @@ local function UpdateBuffSize(frame, size, size2)
 end
 
 -- Set cooldown text size.
-local function UpdateBuffCDSize(buffFrame, size) --
+local function UpdateBuffCDSize(buffFrame, size)
 	buffFrame.cd:SetFont("Fonts\\FRIZQT__.TTF", size, "NORMAL")
 	buffFrame.cdbg:SetHeight(buffFrame.cd:GetStringHeight())
 end
 
 -- Set the stack text size.
-local function SetStackSize(buffFrame, size) --
+local function SetStackSize(buffFrame, size)
 	buffFrame.stack:SetFont("Fonts\\FRIZQT__.TTF", size, "OUTLINE")
 end
 
 -- Called when spell frames are shown.
-local function iconOnShow(self) --
+local function iconOnShow(self)
 	self:SetAlpha(1)
 
 	self.cdbg:Hide()
@@ -147,27 +138,29 @@ local function iconOnShow(self) --
 	self.skin:Hide()
 	self.msqborder:Hide()
 
-	if P.borderTexture == "Masque" and LBF and LBF:Group(folder).db and not LBF:Group(folder).db.Disabled then
-		local Group = LBF:Group(folder).db
-		local skinID = Group.SkinID
-		local ntexture, bordersize, normalsize, borderoffsetX, borderoffsetY
-		local btcoord, itcoord = nil, nil
-		local SkinData = LBF:GetSkin(skinID)
-		if SkinData.Template then
-			bordersize = LBF:GetSkin(SkinData.Template).Border.Height
-			normalsize = LBF:GetSkin(SkinData.Template).Icon.Height
-		else
-			bordersize = SkinData.Border.Height
-			normalsize = SkinData.Icon.Height
+	if P.borderTexture == "Masque" and MSQ then
+		local Group = MSQ:Group(folder)
+		if Group then
+			local skinID = Group.SkinID
+			local ntexture, bordersize, normalsize, borderoffsetX, borderoffsetY
+			local btcoord, itcoord = nil, nil
+			local SkinData = MSQ:GetSkin(skinID)
+			if SkinData.Template then
+				bordersize = MSQ:GetSkin(SkinData.Template).Border.Height
+				normalsize = MSQ:GetSkin(SkinData.Template).Icon.Height
+			else
+				bordersize = SkinData.Border.Height
+				normalsize = SkinData.Icon.Height
+			end
+
+			ntexture = SkinData.Normal.Texture
+
+			self.msqborder.bgtexture = ntexture
+			self.msqborder.bordersize = bordersize
+			self.msqborder.normalsize = normalsize
+
+			self.skin:SetTexture(ntexture)
 		end
-
-		ntexture = SkinData.Normal.Texture
-
-		self.msqborder.bgtexture = ntexture
-		self.msqborder.bordersize = bordersize
-		self.msqborder.normalsize = normalsize
-
-		self.skin:SetTexture(ntexture)
 	else
 		self.msqborder.bgtexture = P.borderTexture
 		self.msqborder.bordersize = 42
@@ -259,7 +252,7 @@ local function iconOnShow(self) --
 end
 
 -- Called when spell frames are shown.
-local function iconOnHide(self) --
+local function iconOnHide(self)
 	self.stack:Hide()
 	self.cdbg:Hide()
 	self.cd:Hide()
@@ -271,7 +264,7 @@ local function iconOnHide(self) --
 end
 
 -- Fires for spell frames.
-local function iconOnUpdate(self, elapsed) --
+local function iconOnUpdate(self, elapsed)
 	self.lastUpdate = self.lastUpdate + elapsed
 	if self.lastUpdate > 0.1 then --abit fast for cooldown flash.
 		self.lastUpdate = 0
@@ -279,7 +272,7 @@ local function iconOnUpdate(self, elapsed) --
 			local rawTimeLeft = self.expirationTime - GetTime()
 			local timeLeft
 			if rawTimeLeft < 10 then
-				timeLeft = core:Round(rawTimeLeft, P.digitsnumber) --, 1
+				timeLeft = core:Round(rawTimeLeft, P.digitsnumber)
 			else
 				timeLeft = core:Round(rawTimeLeft)
 			end
@@ -337,7 +330,7 @@ local function SetBarSize(barFrame, width, height)
 end
 
 local function CreateBuffFrame(parentFrame, realPlate)
-	local f = CreateFrame("Frame", "MainFrame", parentFrame) --
+	local f = CreateFrame("Frame", "MainFrame", parentFrame)
 	f.realPlate = realPlate
 	f:SetFrameStrata("BACKGROUND")
 
@@ -397,6 +390,7 @@ local function CreateBuffFrame(parentFrame, realPlate)
 
 	f.msqborder.bgtexture = nil
 	f.msqborder:Hide()
+
 	return f
 end
 
@@ -414,7 +408,7 @@ function core:UpdateBarsBackground()
 end
 
 -- Create and return a bar frame.
-local function CreateBarFrame(parentFrame, realPlate) --
+local function CreateBarFrame(parentFrame, realPlate)
 	local f = CreateFrame("frame", nil, parentFrame)
 	f.realPlate = realPlate
 
@@ -427,7 +421,7 @@ local function CreateBarFrame(parentFrame, realPlate) --
 	f.barBG = f:CreateTexture(nil, "BACKGROUND")
 	f.barBG:SetAllPoints(true)
 
-	f.barBG:SetTexture(1, 1, 1, 0.3) --uses for testing
+	f.barBG:SetTexture(1, 1, 1, 0.3)
 	if P.showBarBackground == true then
 		f.barBG:Show()
 	else
@@ -440,14 +434,14 @@ end
 
 -- Build all our bar frames for a plate.
 -- We anchor these to the plate and our spell frames to the bar.
-local function BuildPlateBars(plate, visibleFrame) --
+local function BuildPlateBars(plate, visibleFrame)
 	buffBars[plate] = buffBars[plate] or {}
 	if not buffBars[plate][1] then
 		buffBars[plate][1] = CreateBarFrame(visibleFrame, plate)
 	end
 	buffBars[plate][1]:ClearAllPoints()
-	buffBars[plate][1]:SetPoint(P.barAnchorPoint, visibleFrame, P.plateAnchorPoint, P.barOffsetX, P.barOffsetY) -- + GetCooldownHeight(buffFrames[plate][1])
-	buffBars[plate][1]:SetParent(visibleFrame) --uhuh
+	buffBars[plate][1]:SetPoint(P.barAnchorPoint, visibleFrame, P.plateAnchorPoint, P.barOffsetX, P.barOffsetY)
+	buffBars[plate][1]:SetParent(visibleFrame)
 
 	local barPoint = P.barAnchorPoint
 	local parentPoint = P.plateAnchorPoint
@@ -467,7 +461,7 @@ local function BuildPlateBars(plate, visibleFrame) --
 			buffBars[plate][r]:ClearAllPoints()
 
 			buffBars[plate][r]:SetPoint(barPoint, buffBars[plate][r - 1], parentPoint, 0, 0)
-			buffBars[plate][r]:SetParent(visibleFrame) --uhuh
+			buffBars[plate][r]:SetParent(visibleFrame)
 		end
 	end
 end
@@ -501,7 +495,7 @@ local function GetBarChildrenSize(n, ...)
 end
 
 -- Update a bar's size taking into account all the spell frame's height and width.
-local function UpdateBarSize(barFrame) --
+local function UpdateBarSize(barFrame)
 	if barFrame:GetNumChildren() == 0 then return end
 
 	local totalWidth, totalHeight = GetBarChildrenSize(barFrame:GetNumChildren(), barFrame:GetChildren())
@@ -523,7 +517,7 @@ function core:UpdateAllPlateBarSizes()
 end
 
 -- Show spells on a plate linked to a GUID.
-function core:AddBuffsToPlate(plate, GUID) --
+function core:AddBuffsToPlate(plate, GUID)
 	if not buffFrames[plate] or not buffFrames[plate][P.iconsPerBar] then
 		self:BuildBuffFrame(plate)
 	end
@@ -560,7 +554,7 @@ function core:AddBuffsToPlate(plate, GUID) --
 					--make sure OnShow fires.
 					iconOnShow(buffFrames[plate][i])
 
-					iconOnUpdate(buffFrames[plate][i], 1) --do a onupdate.
+					iconOnUpdate(buffFrames[plate][i], 1)
 				else
 					buffFrames[plate][i]:Hide()
 				end
@@ -572,7 +566,7 @@ function core:AddBuffsToPlate(plate, GUID) --
 end
 
 -- Display a question mark icon since we don't know the GUID of the plate/mob.
-function core:AddUnknownIcon(plate) --
+function core:AddUnknownIcon(plate)
 	if not buffFrames[plate] then
 		self:BuildBuffFrame(plate, nil, true)
 	end
@@ -618,7 +612,7 @@ function core:ResetAllPlateIcons()
 end
 
 -- Create our buff frames on a plate.
-function core:BuildBuffFrame(plate, reset, onlyOne) --
+function core:BuildBuffFrame(plate, reset, onlyOne)
 	local visibleFrame = plate
 	if not buffBars[plate] then
 		BuildPlateBars(plate, visibleFrame)
@@ -632,7 +626,7 @@ function core:BuildBuffFrame(plate, reset, onlyOne) --
 
 	if reset then
 		for i = 1, table_getn(buffFrames[plate]) do
-			buffFrames[plate][i]:Hide() --makesure all frames stop OnUpdating.
+			buffFrames[plate][i]:Hide()
 		end
 	end
 
@@ -647,7 +641,7 @@ function core:BuildBuffFrame(plate, reset, onlyOne) --
 	if Testreversepos then
 		buffFrames[plate][total]:SetPoint("TOP", buffBars[plate][1])
 	else
-		buffFrames[plate][total]:SetPoint("BOTTOMLEFT", buffBars[plate][1]) -- + GetCooldownHeight(buffFrames[plate][1])
+		buffFrames[plate][total]:SetPoint("BOTTOMLEFT", buffBars[plate][1])
 	end
 
 	if onlyOne then return end
@@ -703,7 +697,7 @@ function core:ResetBarPoint(barFrame, plate)
 end
 
 -- Reset all icon sizes. Called when user changes settings.
-function core:ResetIconSizes() --
+function core:ResetIconSizes()
 	local iconSize
 	local iconSize2
 	local customincreaze = 1
