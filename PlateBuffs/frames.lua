@@ -4,7 +4,8 @@ if not core.LibNameplates then
 	return
 end
 
-local MSQ
+local MSQ, Group = core.MSQ or LibStub("LibButtonFacade", true) or LibStub("Masque", true)
+core.MSQ = MSQ
 
 local Testreversepos = false
 
@@ -56,10 +57,12 @@ do
 	function core:OnEnable()
 		OnEnable(self)
 		P = self.db.profile --this can change on profile change.
-		MSQ = MSQ or LibStub("Masque", true) or LibStub("LibButtonFacade", true)
-		if MSQ then
+		MSQ = core.MSQ or LibStub("LibButtonFacade", true) or LibStub("Masque", true)
+		if MSQ and MSQ.RegisterSkinCallback then -- LibButtonFacade-specific
 			MSQ:RegisterSkinCallback(folder, self.SkinCallback, self)
 			MSQ:Group(folder):Skin(self.db.profile.skin_SkinID, self.db.profile.skin_Gloss, self.db.profile.skin_Backdrop, self.db.profile.skin_Colors)
+		elseif MSQ then -- Masque-specific
+			Group = MSQ:Group(folder)
 		end
 	end
 end
@@ -139,27 +142,29 @@ local function iconOnShow(self)
 	self.msqborder:Hide()
 
 	if P.borderTexture == "Masque" and MSQ then
-		local Group = MSQ:Group(folder)
+		Group = Group or MSQ:Group(folder)
 		if Group then
-			local skinID = Group.SkinID
-			local ntexture, bordersize, normalsize, borderoffsetX, borderoffsetY
-			local btcoord, itcoord = nil, nil
-			local SkinData = MSQ:GetSkin(skinID)
-			if SkinData.Template then
-				bordersize = MSQ:GetSkin(SkinData.Template).Border.Height
-				normalsize = MSQ:GetSkin(SkinData.Template).Icon.Height
-			else
-				bordersize = SkinData.Border.Height
-				normalsize = SkinData.Icon.Height
+			local skinID = Group.SkinID or Group.db and Group.db.SkinID
+			local SkinData = skinID and MSQ:GetSkin(skinID)
+			if SkinData then
+				local ntexture, bordersize, normalsize, borderoffsetX, borderoffsetY
+				local btcoord, itcoord = nil, nil
+				if SkinData.Template then
+					bordersize = MSQ:GetSkin(SkinData.Template).Border.Height
+					normalsize = MSQ:GetSkin(SkinData.Template).Icon.Height
+				else
+					bordersize = SkinData.Border.Height
+					normalsize = SkinData.Icon.Height
+				end
+
+				ntexture = SkinData.Normal.Texture
+
+				self.msqborder.bgtexture = ntexture
+				self.msqborder.bordersize = bordersize
+				self.msqborder.normalsize = normalsize
+
+				self.skin:SetTexture(ntexture)
 			end
-
-			ntexture = SkinData.Normal.Texture
-
-			self.msqborder.bgtexture = ntexture
-			self.msqborder.bordersize = bordersize
-			self.msqborder.normalsize = normalsize
-
-			self.skin:SetTexture(ntexture)
 		end
 	else
 		self.msqborder.bgtexture = P.borderTexture

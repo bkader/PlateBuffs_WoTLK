@@ -2,6 +2,9 @@ local folder, core = ...
 
 if not core.LibNameplates then return end
 
+local MSQ = core.MSQ or LibStub("LibButtonFacade", true) or LibStub("Masque", true)
+core.MSQ = MSQ
+
 --Globals
 local _G = _G
 local pairs = pairs
@@ -186,7 +189,7 @@ core.CoreOptionsTable = {
 			values = {
 				[""] = NONE,
 				["Interface\\Addons\\PlateBuffs\\media\\border.tga"] = "Default",
-				["Masque"] = (LibStub("LibButtonFacade", true) and "Masque" or nil)
+				["Masque"] = (MSQ and "Masque" or nil)
 			},
 			set = function(info, val)
 				P.borderTexture = val

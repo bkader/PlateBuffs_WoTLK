@@ -1,7 +1,6 @@
 --[[
 Author:		Cyprias, Kader
 License:	All Rights Reserved
-Contact:	Cyprias on Curse.com or WowAce.com
 ]]
 local folder, core = ...
 LibStub("AceAddon-3.0"):NewAddon(core, folder, "AceConsole-3.0", "AceEvent-3.0")
