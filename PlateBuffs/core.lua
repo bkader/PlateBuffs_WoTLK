@@ -29,6 +29,8 @@ core.addonDir = "Interface\\AddOns\\" .. folder .. "\\"
 core.LibNameplates = LibNameplates
 core.LSM = LSM
 
+local LDS = LibStub("LibDualSpec-1.0", true)
+
 local L = LibStub("AceLocale-3.0"):GetLocale(folder, true)
 core.L = L
 
@@ -229,6 +231,8 @@ function core:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileDeleted", "OnProfileChanged")
 	self:RegisterChatCommand("pb", "MySlashProcessorFunc")
 
+	if LDS then LDS:EnhanceDatabase(self.db, self.title) end
+
 	self:BuildAboutMenu()
 
 	local config = LibStub("AceConfig-3.0")
@@ -252,8 +256,11 @@ function core:OnInitialize()
 	dialog:AddToBlizOptions(self.title .. "About", L.about, self.titleFull)
 
 	--last UI
-	config:RegisterOptionsTable(self.title .. "Profile", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
+	local optionsTable = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+	config:RegisterOptionsTable(self.title .. "Profile", optionsTable)
 	dialog:AddToBlizOptions(self.title .. "Profile", L["Profiles"], self.titleFull)
+
+	if LDS then LDS:EnhanceOptions(optionsTable, self.db) end
 
 	LSM:Register(
 		"font",

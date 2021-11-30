@@ -1049,10 +1049,15 @@ do
 			name = yellow:format(L.version .. ": ") .. self.version,
 			order = 2
 		}
+		self.AboutOptionsTable.args.about.args.version = {
+			type = "description",
+			name = yellow:format(L.date .. ": ") .. (GetAddOnMetadata(folder, "X-Date") or ""),
+			order = 3
+		}
 		self.AboutOptionsTable.args.about.args.notes = {
 			type = "description",
 			name = yellow:format(L.notes .. ": ") .. tostring(GetAddOnMetadata(folder, "Notes")),
-			order = 3
+			order = 4
 		}
 
 		for i, field in pairs(fields) do

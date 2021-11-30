@@ -144,4 +144,5 @@ L["sizes: 9, 10, 12, 13, 14, 16, 20"] = "Tamaños: 9, 10, 12, 13, 14, 16, 20"
 L["spells to show by default"] = "Hechizos a mostrar por defecto"
 L["title"] = "Titulo" -- Needs review
 L["version"] = "Versión" -- Needs review
+L["date"] = "Fecha"
 L["website"] = "Sitio web" -- Needs review

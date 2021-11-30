@@ -140,4 +140,5 @@ L["sizes: 9, 10, 12, 13, 14, 16, 20"] = "大小: 9, 10, 12, 13, 14, 16, 20"
 L["spells to show by default"] = "法术按默认值显示"
 L["title"] = "标题" -- Needs review
 L["version"] = "版本" -- Needs review
+L["date"] = "日期"
 L["website"] = "网站" -- Needs review
