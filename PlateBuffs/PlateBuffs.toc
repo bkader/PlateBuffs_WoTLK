@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## X-Compatible-With: 30300
 ## Title: Plate Buffs
-## Version: 1.18.2 (r230)
+## Version: 1.18.2 (r231)
 ## Notes: Show buffs on nameplates.
 ## Author: Cyprias (Kader Backport)
 ## SavedVariables: PB_DB
@@ -19,7 +19,7 @@
 ## X-Donate: bkader@mail.com
 ## X-Discord: https://discord.gg/a8z5CyS3eW
 ## X-License: All Rights Reserved
-## X-Date: 2021-12-01 @ 01:04 AM |cff808080UTC|r
+## X-Date: 2021-12-17 @ 12:23 PM |cff808080UTC|r
 
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: true

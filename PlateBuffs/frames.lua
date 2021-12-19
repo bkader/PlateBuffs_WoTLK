@@ -68,7 +68,7 @@ do
 end
 
 local function GetTexCoordFromSize(frame, size, size2)
-	local gap = P.textureSize
+	local gap = P.textureSize or 0.1
 
 	local arg = size / size2
 	local abj
@@ -88,6 +88,7 @@ end
 
 -- Update a spell frame's texture size.
 local function UpdateBuffSize(frame, size, size2)
+	size, size2 = size or 24, size2 or 24
 	local d, d2
 	local msqbs = frame.msqborder.bordersize or size
 	local msqns = frame.msqborder.normalsize or size
@@ -108,12 +109,12 @@ local function UpdateBuffSize(frame, size, size2)
 	frame.icon:SetWidth(size)
 	frame.icon:SetHeight(size2)
 	GetTexCoordFromSize(frame.texture, size, size2)
-	frame:SetWidth(size + P.intervalX)
+	frame:SetWidth(size + (P.intervalX or 12))
 
 	if P.showCooldown == true then
-		frame:SetHeight(size2 + P.cooldownSize + P.intervalY)
+		frame:SetHeight(size2 + P.cooldownSize + (P.intervalY or 12))
 	else
-		frame:SetHeight(size2 + P.intervalY)
+		frame:SetHeight(size2 + (P.intervalY or 12))
 	end
 end
 
