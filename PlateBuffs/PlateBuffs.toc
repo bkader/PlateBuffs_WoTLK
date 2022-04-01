@@ -19,7 +19,7 @@
 ## X-Donate: bkader@mail.com
 ## X-Discord: https://discord.gg/a8z5CyS3eW
 ## X-License: All Rights Reserved
-## X-Date: 2022-02-27 @ 04:27 PM |cff808080UTC|r
+## X-Date: 2022-04-01 @ 05:34 PM |cff808080UTC|r
 
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: true
