@@ -321,9 +321,10 @@ function core:RemoveOldSpells(GUID)
 	for i = (P.numBars * P.iconsPerBar), 1, -1 do
 		if guidBuffs[GUID] and guidBuffs[GUID][i] then
 			if
-				guidBuffs[GUID][i].expirationTime and guidBuffs[GUID][i].expirationTime > 0 and
-					GetTime() > guidBuffs[GUID][i].expirationTime
-			 then
+				guidBuffs[GUID][i].expirationTime and
+				guidBuffs[GUID][i].expirationTime > 0 and
+				GetTime() > guidBuffs[GUID][i].expirationTime
+			then
 				table_remove(guidBuffs[GUID], i)
 			end
 		end
@@ -344,7 +345,7 @@ local function CreateBuffFrame(parentFrame, realPlate)
 	f.icon:SetPoint("TOP", f)
 
 	f.texture = f.icon:CreateTexture(nil, "BACKGROUND")
-	f.texture:SetAllPoints(f.icon)
+	f.texture:SetAllPoints(true)
 
 	local cd = f:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
 	cd:SetText("")
