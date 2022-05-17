@@ -121,6 +121,7 @@ end
 -- Set cooldown text size.
 local function UpdateBuffCDSize(buffFrame, size)
 	buffFrame.cd:SetFont("Fonts\\FRIZQT__.TTF", size, "NORMAL")
+	buffFrame.cd2:SetFont("Fonts\\FRIZQT__.TTF", size, "OUTLINE")
 	buffFrame.cdbg:SetHeight(buffFrame.cd:GetStringHeight())
 end
 
@@ -135,6 +136,7 @@ local function iconOnShow(self)
 
 	self.cdbg:Hide()
 	self.cd:Hide()
+	self.cd2:Hide()
 	self.cdtexture:Hide()
 	self.stack:Hide()
 	self.border:Hide()
@@ -178,11 +180,17 @@ local function iconOnShow(self)
 	if P.showCooldown == true and self.expirationTime > 0 then
 		self.cdbg:Show()
 		self.cd:Show()
+		self.cd2:Hide()
+		self.cd2:Hide()
+	else
+		self.cdbg:Hide()
+		self.cd:Hide()
+		if P.showCooldownTexture == true then
+			self.cd2:Show()
+		end
 	end
 	if P.showCooldownTexture == true then
 		self.cdtexture:Show()
-		local cdtexturetimer = self.startTime or GetTime()
-		self.cdtexture:SetCooldown(cdtexturetimer, self.duration)
 	else
 		self.cdtexture:Hide()
 	end
@@ -262,9 +270,11 @@ local function iconOnHide(self)
 	self.stack:Hide()
 	self.cdbg:Hide()
 	self.cd:Hide()
+	self.cd2:Hide()
 	self.msqborder:Hide()
 	self.skin:Hide()
 	self.cdtexture:Hide()
+	self.cdtexture:SetHeight(0.00001)
 	self:SetAlpha(1)
 	UpdateBuffSize(self, P.iconSize, P.iconSize2)
 end
@@ -287,6 +297,11 @@ local function iconOnUpdate(self, elapsed)
 				self.cd:SetText(core:SecondsToString(timeLeft, 1))
 				self.cd:SetTextColor(core:RedToGreen(timeLeft, self.duration))
 				self.cdbg:SetWidth(self.cd:GetStringWidth())
+			end
+			if P.showCooldownTexture == true then
+				self.cd2:SetText(core:SecondsToString(timeLeft, 1))
+				self.cd2:SetTextColor(core:RedToGreen(timeLeft, self.duration))
+				self.cdtexture:SetHeight(max(0.00001, ((self.duration - timeLeft) / self.duration) * P.iconSize2))
 			end
 
 			if (timeLeft / (self.duration + 0.01)) < P.blinkTimeleft and timeLeft < 60 then --buff only has 20% timeleft and is less then 60 seconds.
@@ -347,19 +362,25 @@ local function CreateBuffFrame(parentFrame, realPlate)
 	f.texture = f.icon:CreateTexture(nil, "BACKGROUND")
 	f.texture:SetAllPoints(true)
 
-	local cd = f:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
-	cd:SetText("")
-	cd:SetPoint("TOP", f.icon, "BOTTOM")
-	f.cd = cd
+	f.cd = f:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
+	f.cd:SetText("")
+	f.cd:SetPoint("TOP", f.icon, "BOTTOM")
 
 	--Make the text easier to see.
 	f.cdbg = f:CreateTexture(nil, "BACKGROUND")
 	f.cdbg:SetTexture(0, 0, 0, .75)
-	f.cdbg:SetPoint("CENTER", cd)
+	f.cdbg:SetPoint("CENTER", f.cd)
 
-	f.cdtexture = CreateFrame("Cooldown", "MainFrameTexture", f.icon, "CooldownFrameTemplate")
-	f.cdtexture:SetAllPoints(true)
-	f.cdtexture:SetReverse(true)
+	f.cdtexture = f.icon:CreateTexture(nil, "BORDER")
+	f.cdtexture:SetPoint("TOPLEFT")
+	f.cdtexture:SetPoint("TOPRIGHT")
+	f.cdtexture:SetHeight(0.00001)
+	f.cdtexture:SetTexture([[Interface\Buttons\WHITE8X8]])
+	f.cdtexture:SetVertexColor(0, 0, 0, 0.65)
+
+	f.cd2 = f.icon:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
+	f.cd2:SetText("")
+	f.cd2:SetAllPoints(true)
 
 	f.border = f.icon:CreateTexture(nil, "BORDER")
 	f.border:SetAllPoints(f.icon)
@@ -380,6 +401,7 @@ local function CreateBuffFrame(parentFrame, realPlate)
 
 	f.cdbg:Hide()
 	f.cd:Hide()
+	f.cd2:Hide()
 	f.border:Hide()
 	f.cdtexture:Hide()
 	f.stack:Hide()
@@ -608,7 +630,7 @@ end
 function core:SetFrameLevel(frame)
 	Debug("SetFrameLevel", frame, self.db.profile.frameLevel)
 	frame:SetFrameLevel(self.db.profile.frameLevel)
-	frame.cdtexture:SetFrameLevel(self.db.profile.frameLevel + 1)
+	-- frame.cdtexture:SetFrameLevel(self.db.profile.frameLevel + 1)
 end
 
 -- This will reset all the anchors on the spell frames.
