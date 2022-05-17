@@ -502,11 +502,13 @@ do
 	local UnitDebuff = UnitDebuff
 
 	function core:CollectUnitInfo(unitID)
-		if UnitIsUnit(unitID, "player") then return end
+		if not unitID or UnitIsUnit(unitID, "player") then return end
 
 		local GUID = UnitGUID(unitID)
+		if not GUID then return end
+
 		local unitName = UnitName(unitID)
-		if P.saveNameToGUID == true and UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss" then
+		if unitName and P.saveNameToGUID == true and UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss" then
 			nametoGUIDs[unitName] = GUID
 		end
 
@@ -628,7 +630,7 @@ do
 			end
 		end
 
-		if not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
+		if unitName and not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
 			-- LibNameplates can't find a nameplate that matches that GUID. Since the unitID's a player/worldboss which have unique names, add buffs to the frame that matches that name.
 			-- Note, this /can/ add buffs to the wrong frame if a hunter pet has the same name as a player. This is so rare that I'll risk it.
 			self:UpdatePlateByName(unitName)
