@@ -181,7 +181,6 @@ local function iconOnShow(self)
 		self.cdbg:Show()
 		self.cd:Show()
 		self.cd2:Hide()
-		self.cd2:Hide()
 	else
 		self.cdbg:Hide()
 		self.cd:Hide()
