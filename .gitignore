@@ -1,5 +1,6 @@
 _dev
 Makefile
 *.zip
-*.sublime-*
-*.sublime-*
+*.7z
+*.sublime-project
+*.sublime-workspace

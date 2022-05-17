@@ -320,6 +320,11 @@ local function GetPlateByName(name, maxhp)
 end
 core.GetPlateByName = GetPlateByName
 
+local function GetTargetPlate()
+	return LibNameplates:GetTargetNameplate()
+end
+core.GetTargetPlate = GetTargetPlate
+
 do
 	local OnEnable = core.OnEnable
 	function core:OnEnable(...)
@@ -497,6 +502,8 @@ do
 	local UnitDebuff = UnitDebuff
 
 	function core:CollectUnitInfo(unitID)
+		if UnitIsUnit(unitID, "player") then return end
+
 		local GUID = UnitGUID(unitID)
 		local unitName = UnitName(unitID)
 		if P.saveNameToGUID == true and UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss" then
@@ -518,9 +525,14 @@ do
 				name, _, icon, count, _, duration, expirationTime, unitCaster, _, _, spellId = UnitBuff(unitID, i)
 				icon = icon:upper():gsub("(.+)\\(.+)\\", "")
 
-				local spellOpts = self:HaveSpellOpts(name, spellId)
+				local spellOpts = (duration > 0) and self:HaveSpellOpts(name, spellId) or nil
 				if spellOpts and spellOpts.show and P.defaultBuffShow ~= 4 then
-					if spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster == "player") or (spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or (spellOpts.show == 5 and UnitCanAttack("player", unitID)) then
+					if
+						spellOpts.show == 1 or
+						(spellOpts.show == 2 and unitCaster == "player") or
+						(spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or
+						(spellOpts.show == 5 and UnitCanAttack("player", unitID))
+					then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
@@ -533,8 +545,12 @@ do
 							caster = unitCaster and core:GetFullName(unitCaster)
 						})
 					end
-				else
-					if P.defaultBuffShow == 1 or (P.defaultBuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or (P.defaultBuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player")) then
+				elseif duration > 0 then
+					if
+						P.defaultBuffShow == 1 or
+						(P.defaultBuffShow == 2 and unitCaster == "player") or
+						(P.defaultBuffShow == 4 and unitCaster == "player")
+					then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
@@ -557,9 +573,14 @@ do
 				name, _, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId = UnitDebuff(unitID, i)
 				icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
 
-				local spellOpts = self:HaveSpellOpts(name, spellId)
+				local spellOpts = (duration > 0) and self:HaveSpellOpts(name, spellId) or nil
 				if spellOpts and spellOpts.show and P.defaultDebuffShow ~= 4 then
-					if spellOpts.show == 1 or (spellOpts.show == 2 and unitCaster == "player") or (spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or (spellOpts.show == 5 and UnitCanAttack("player", unitID)) then
+					if
+						spellOpts.show == 1 or
+						(spellOpts.show == 2 and unitCaster == "player") or
+						(spellOpts.show == 4 and not UnitCanAttack("player", unitID)) or
+						(spellOpts.show == 5 and UnitCanAttack("player", unitID))
+					then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
@@ -574,8 +595,12 @@ do
 							caster = unitCaster and core:GetFullName(unitCaster)
 						})
 					end
-				else
-					if P.defaultDebuffShow == 1 or (P.defaultDebuffShow == 2 and unitCaster and UnitIsUnit(unitCaster, "player")) or (P.defaultDebuffShow == 4 and unitCaster and UnitIsUnit(unitCaster, "player")) then
+				elseif duration > 0 then
+					if
+						P.defaultDebuffShow == 1 or
+						(P.defaultDebuffShow == 2 and unitCaster == "player") or
+						(P.defaultDebuffShow == 4 and unitCaster == "player")
+					then
 						table_insert(guidBuffs[GUID], {
 							name = name,
 							icon = icon,
@@ -669,7 +694,7 @@ end
 function core:UpdatePlateByGUID(GUID)
 	local plate = GetPlateByGUID(GUID)
 	if plate and self:ShouldAddBuffs(plate) == true then
-		core:AddBuffsToPlate(plate, GUID)
+		self:AddBuffsToPlate(plate, GUID)
 		return true
 	end
 	return false
@@ -686,6 +711,20 @@ function core:UpdatePlateByName(name)
 			return true
 		end
 	end
+	return false
+end
+
+-- This should speed up the look up and the display when it comes
+-- to targeted units and their nameplates, hopefully.
+function core:UpdateTargetPlate(GUID)
+	if UnitExists("target") and UnitGUID("target") == GUID then
+		local plate = GetTargetPlate()
+		if plate and self:ShouldAddBuffs(plate) == true then
+			self:AddBuffsToPlate(plate, GUID)
+			return true
+		end
+	end
+	return false
 end
 
 function core:GetAllSpellIDs()
