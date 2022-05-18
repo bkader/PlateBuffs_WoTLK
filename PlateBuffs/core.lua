@@ -633,7 +633,7 @@ do
 		if unitName and not self:UpdatePlateByGUID(GUID) and (UnitIsPlayer(unitID) or UnitClassification(unitID) == "worldboss") then
 			-- LibNameplates can't find a nameplate that matches that GUID. Since the unitID's a player/worldboss which have unique names, add buffs to the frame that matches that name.
 			-- Note, this /can/ add buffs to the wrong frame if a hunter pet has the same name as a player. This is so rare that I'll risk it.
-			self:UpdatePlateByName(unitName)
+			self:UpdatePlateByName(unitName, UnitHealthMax(unitID))
 		end
 	end
 end
@@ -704,10 +704,10 @@ end
 
 -- This will add buff frames to a frame matching a given name.
 -- This should only be used for player names because mobs/npcs can share the same name.
-function core:UpdatePlateByName(name)
+function core:UpdatePlateByName(name, maxhp)
 	local GUID = nametoGUIDs[name]
 	if GUID then
-		local plate = GetPlateByName(name)
+		local plate = GetPlateByName(name, maxhp)
 		if plate and self:ShouldAddBuffs(plate) == true then
 			core:AddBuffsToPlate(plate, GUID)
 			return true
