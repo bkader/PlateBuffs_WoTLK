@@ -720,10 +720,7 @@ core.DefaultSpellOptionsTable = {
 			order = 8,
 			min = 0,
 			max = 2,
-			step = 1,
-			set = function(info, val)
-				P.digitsnumber = val
-			end
+			step = 1
 		},
 		blinkTimeleft = {
 			type = "range",
@@ -750,10 +747,14 @@ core.DefaultSpellOptionsTable = {
 			type = "toggle",
 			name = L["Show cooldown overlay"],
 			desc = L["Show a clock overlay over spell textures showing the time remaining."] .. "\n" .. L["This overlay tends to disappear when the frame's moving."],
-			order = 11,
-			set = function(info, val)
-				P.showCooldownTexture = val
-			end
+			order = 11
+		},
+		legacyCooldownTexture = {
+			type = "toggle",
+			name = L["Legacy cooldown overlay"],
+			desc = L["Use the old clock overlay to which cooldown text addons can hook their texts.\nRequires UI Reload."],
+			disabled = function() return (UnitAffectingCombat("player") or InCombatLockdown()) end,
+			order = 12
 		}
 	}
 }

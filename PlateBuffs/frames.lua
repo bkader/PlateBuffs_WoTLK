@@ -111,7 +111,7 @@ local function UpdateBuffSize(frame, size, size2)
 	GetTexCoordFromSize(frame.texture, size, size2)
 	frame:SetWidth(size + (P.intervalX or 12))
 
-	if P.showCooldown == true then
+	if P.showCooldown then
 		frame:SetHeight(size2 + P.cooldownSize + (P.intervalY or 12))
 	else
 		frame:SetHeight(size2 + (P.intervalY or 12))
@@ -121,8 +121,10 @@ end
 -- Set cooldown text size.
 local function UpdateBuffCDSize(buffFrame, size)
 	buffFrame.cd:SetFont("Fonts\\FRIZQT__.TTF", size, "NORMAL")
-	buffFrame.cd2:SetFont("Fonts\\FRIZQT__.TTF", size, "OUTLINE")
 	buffFrame.cdbg:SetHeight(buffFrame.cd:GetStringHeight())
+	if not P.legacyCooldownTexture and buffFrame.cd2 then
+		buffFrame.cd2:SetFont("Fonts\\FRIZQT__.TTF", size, "OUTLINE")
+	end
 end
 
 -- Set the stack text size.
@@ -136,10 +138,12 @@ local function iconOnShow(self)
 
 	self.cdbg:Hide()
 	self.cd:Hide()
-	self.cd2:Hide()
 	self.cdtexture:Hide()
 	self.stack:Hide()
 	self.border:Hide()
+	if not P.legacyCooldownTexture and self.cd2 then
+		self.cd2:Hide()
+	end
 
 	self.skin:Hide()
 	self.msqborder:Hide()
@@ -177,19 +181,24 @@ local function iconOnShow(self)
 		self.skin:SetTexture(P.borderTexture)
 	end
 
-	if P.showCooldown == true and self.expirationTime > 0 then
+	if P.showCooldown and self.expirationTime > 0 then
 		self.cdbg:Show()
 		self.cd:Show()
-		self.cd2:Hide()
+		if not P.legacyCooldownTexture and self.cd2 then
+			self.cd2:Hide()
+		end
 	else
 		self.cdbg:Hide()
 		self.cd:Hide()
-		if P.showCooldownTexture == true then
+		if not P.legacyCooldownTexture and P.showCooldownTexture and self.cd2 then
 			self.cd2:Show()
 		end
 	end
-	if P.showCooldownTexture == true then
+	if P.showCooldownTexture then
 		self.cdtexture:Show()
+		if P.legacyCooldownTexture and self.cdtexture.SetCooldown then
+			self.cdtexture:SetCooldown(self.startTime or GetTime(), self.duration)
+		end
 	else
 		self.cdtexture:Hide()
 	end
@@ -257,7 +266,7 @@ local function iconOnShow(self)
 		self.msqborder:Show()
 	end
 
-	if self.playerCast and P.biggerSelfSpells == true then
+	if self.playerCast and P.biggerSelfSpells then
 		UpdateBuffSize(self, (iconSize * 1.2 * customSize), (iconSize2 * 1.2 * customSize))
 	else
 		UpdateBuffSize(self, iconSize * customSize, iconSize2 * customSize)
@@ -269,11 +278,15 @@ local function iconOnHide(self)
 	self.stack:Hide()
 	self.cdbg:Hide()
 	self.cd:Hide()
-	self.cd2:Hide()
 	self.msqborder:Hide()
 	self.skin:Hide()
 	self.cdtexture:Hide()
-	self.cdtexture:SetHeight(0.00001)
+	if not P.legacyCooldownTexture then
+		if self.cd2 then
+			self.cd2:Hide()
+		end
+		self.cdtexture:SetHeight(0.00001)
+	end
 	self:SetAlpha(1)
 	UpdateBuffSize(self, P.iconSize, P.iconSize2)
 end
@@ -292,15 +305,19 @@ local function iconOnUpdate(self, elapsed)
 				timeLeft = core:Round(rawTimeLeft)
 			end
 
-			if P.showCooldown == true then
+			if P.showCooldown then
 				self.cd:SetText(core:SecondsToString(timeLeft, 1))
 				self.cd:SetTextColor(core:RedToGreen(timeLeft, self.duration))
 				self.cdbg:SetWidth(self.cd:GetStringWidth())
 			end
-			if P.showCooldownTexture == true then
-				self.cd2:SetText(core:SecondsToString(timeLeft, 1))
-				self.cd2:SetTextColor(core:RedToGreen(timeLeft, self.duration))
-				self.cdtexture:SetHeight(max(0.00001, ((self.duration - timeLeft) / self.duration) * P.iconSize2))
+			if not P.legacyCooldownTexture and P.showCooldownTexture then
+				if self.cd2 then
+					self.cd2:SetText(core:SecondsToString(timeLeft, 1))
+					self.cd2:SetTextColor(core:RedToGreen(timeLeft, self.duration))
+				end
+				if not self.cdtexture.SetCooldown then
+					self.cdtexture:SetHeight(max(0.00001, ((self.duration - timeLeft) / self.duration) * P.iconSize2))
+				end
 			end
 
 			if (timeLeft / (self.duration + 0.01)) < P.blinkTimeleft and timeLeft < 60 then --buff only has 20% timeleft and is less then 60 seconds.
@@ -370,16 +387,23 @@ local function CreateBuffFrame(parentFrame, realPlate)
 	f.cdbg:SetTexture(0, 0, 0, .75)
 	f.cdbg:SetPoint("CENTER", f.cd)
 
-	f.cdtexture = f.icon:CreateTexture(nil, "BORDER")
-	f.cdtexture:SetPoint("TOPLEFT")
-	f.cdtexture:SetPoint("TOPRIGHT")
-	f.cdtexture:SetHeight(0.00001)
-	f.cdtexture:SetTexture([[Interface\Buttons\WHITE8X8]])
-	f.cdtexture:SetVertexColor(0, 0, 0, 0.65)
+	if P.legacyCooldownTexture then
+		f.cdtexture = CreateFrame("Cooldown", "MainFrameTexture", f.icon, "CooldownFrameTemplate")
+		f.cdtexture:SetAllPoints(true)
+		f.cdtexture:SetReverse(true)
+	else
+		f.cdtexture = f.icon:CreateTexture(nil, "BORDER")
+		f.cdtexture:SetPoint("TOPLEFT")
+		f.cdtexture:SetPoint("TOPRIGHT")
+		f.cdtexture:SetHeight(0.00001)
+		f.cdtexture:SetTexture([[Interface\Buttons\WHITE8X8]])
+		f.cdtexture:SetVertexColor(0, 0, 0, 0.65)
 
-	f.cd2 = f.icon:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
-	f.cd2:SetText("")
-	f.cd2:SetAllPoints(true)
+		f.cd2 = f.icon:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
+		f.cd2:SetText("")
+		f.cd2:SetAllPoints(true)
+		f.cd2:Hide()
+	end
 
 	f.border = f.icon:CreateTexture(nil, "BORDER")
 	f.border:SetAllPoints(f.icon)
@@ -400,7 +424,6 @@ local function CreateBuffFrame(parentFrame, realPlate)
 
 	f.cdbg:Hide()
 	f.cd:Hide()
-	f.cd2:Hide()
 	f.border:Hide()
 	f.cdtexture:Hide()
 	f.stack:Hide()
