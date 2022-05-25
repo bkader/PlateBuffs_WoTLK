@@ -262,12 +262,7 @@ function core:OnInitialize()
 
 	if LDS then LDS:EnhanceOptions(optionsTable, self.db) end
 
-	LSM:Register(
-		"font",
-		"Friz Quadrata TT CYR",
-		[[Interface\AddOns\AleaUI\media\FrizQuadrataTT_New.ttf]],
-		LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western
-	)
+	LSM:Register("font", "Friz Quadrata TT CYR", [[Interface\AddOns\AleaUI\media\FrizQuadrataTT_New.ttf]], LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western)
 end
 
 local function GetPlateName(plate)

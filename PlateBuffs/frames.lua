@@ -7,6 +7,9 @@ end
 local MSQ, Group = core.MSQ or LibStub("LibButtonFacade", true) or LibStub("Masque", true)
 core.MSQ = MSQ
 
+local LSM = core.LSM or LibStub("LibSharedMedia-3.0", true)
+core.LSM = LSM
+
 local Testreversepos = false
 
 local L = core.L or LibStub("AceLocale-3.0"):GetLocale(folder, true)
@@ -120,10 +123,11 @@ end
 
 -- Set cooldown text size.
 local function UpdateBuffCDSize(buffFrame, size)
-	buffFrame.cd:SetFont("Fonts\\FRIZQT__.TTF", size, "NORMAL")
+	local font = P.cooldownFont and LSM:Fetch("font", P.cooldownFont) or "Fonts\\FRIZQT__.TTF"
+	buffFrame.cd:SetFont(font, size, "NORMAL")
 	buffFrame.cdbg:SetHeight(buffFrame.cd:GetStringHeight())
 	if not P.legacyCooldownTexture and buffFrame.cd2 then
-		buffFrame.cd2:SetFont("Fonts\\FRIZQT__.TTF", size, "OUTLINE")
+		buffFrame.cd2:SetFont(font, size, "OUTLINE")
 	end
 end
 

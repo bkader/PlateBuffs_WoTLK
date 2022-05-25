@@ -1,4 +1,4 @@
-﻿local folder, core = ...
+local folder, core = ...
 local L = LibStub("AceLocale-3.0"):NewLocale(folder, "zhTW")
 if not L then return end
 L["Add Spell Description"] = "添加法術描述"
@@ -29,6 +29,7 @@ L["Bottom Left"] = "底部左邊"
 L["Bottom Right"] = "底部右邊"
 L["Center"] = "中間"
 L["Cooldown Size"] = "冷卻大小"
+L["Cooldown Text Font"] = "冷却时间文本字体"
 L["Cooldown Text Size"] = "冷卻時間的文字大小" -- Needs review
 L["Core"] = "中心"
 L["Default Spells"] = "默認法術"

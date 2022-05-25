@@ -5,6 +5,9 @@ if not core.LibNameplates then return end
 local MSQ = core.MSQ or LibStub("LibButtonFacade", true) or LibStub("Masque", true)
 core.MSQ = MSQ
 
+local LSM = core.LSM or LibStub("LibSharedMedia-3.0", true)
+core.LSM = LSM
+
 --Globals
 local _G = _G
 local pairs = pairs
@@ -732,11 +735,30 @@ core.DefaultSpellOptionsTable = {
 			step = 0.05,
 			isPercent = true
 		},
+		cooldownFont = {
+			type = "select",
+			name = L["Cooldown Text Font"],
+			order = 10,
+			width = "double",
+			values = LSM:HashTable("font"),
+			dialogControl = "LSM30_Font",
+			get = function()
+				return P.cooldownFont or "Friz Quadrata TT"
+			end,
+			set = function(_, val)
+				P.cooldownFont = val
+				core:ResetCooldownSize()
+				core:ShowAllKnownSpells()
+			end,
+			disabled = function()
+				return (P.legacyCooldownTexture or not (P.showCooldown or P.showCooldownTexture))
+			end
+		},
 		showCooldown = {
 			type = "toggle",
 			name = L["Show cooldown"],
 			desc = L["Show cooldown text under the spell icon."],
-			order = 10,
+			order = 11,
 			set = function(info, val)
 				P.showCooldown = val
 				core:ResetIconSizes()
@@ -747,14 +769,14 @@ core.DefaultSpellOptionsTable = {
 			type = "toggle",
 			name = L["Show cooldown overlay"],
 			desc = L["Show a clock overlay over spell textures showing the time remaining."] .. "\n" .. L["This overlay tends to disappear when the frame's moving."],
-			order = 11
+			order = 12
 		},
 		legacyCooldownTexture = {
 			type = "toggle",
 			name = L["Legacy cooldown overlay"],
 			desc = L["Use the old clock overlay to which cooldown text addons can hook their texts.\nRequires UI Reload."],
-			disabled = function() return (UnitAffectingCombat("player") or InCombatLockdown()) end,
-			order = 12
+			disabled = function() return (UnitAffectingCombat("player") or InCombatLockdown() or not P.showCooldownTexture) end,
+			order = 13
 		}
 	}
 }

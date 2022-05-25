@@ -96,6 +96,7 @@ L["Larger self spells"] = true
 L["Make your spells 20% bigger then other's."] = true
 L["Show cooldown"] = true
 L["Show cooldown text under the spell icon."] = true
+L["Cooldown Text Font"] = true
 L["Cooldown Text Size"] = true
 L["sizes: 9, 10, 12, 13, 14, 16, 20"] = true
 L["Show bar background"] = true

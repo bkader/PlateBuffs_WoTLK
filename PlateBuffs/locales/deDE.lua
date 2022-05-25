@@ -29,6 +29,7 @@ L["Bottom Left"] = "Unten links"
 L["Bottom Right"] = "Unten rechts"
 L["Center"] = "Mitte"
 L["Cooldown Size"] = "Cooldown-Größe"
+L["Cooldown Text Font"] = "Cooldown-Schriftart"
 L["Cooldown Text Size"] = "Cooldown-Textgröße"
 L["Core"] = "Kern" -- Needs review
 L["Default Spells"] = "Standard Zauber"
