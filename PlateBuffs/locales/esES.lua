@@ -134,7 +134,6 @@ L["Who"] = "Quien"
 L["about"] = "Sobre" -- Needs review
 L["author"] = "Autor" -- Needs review
 L["clickCopy"] = "Hacer clic y pulsar Ctrl-C para copiar" -- Needs review
-L["donate"] = "Donar" -- Needs review
 L["email"] = "Correo electronico" -- Needs review
 L["enableDesc"] = "Activar/deactivar" -- Needs review
 L["license"] = "Licencia" -- Needs review

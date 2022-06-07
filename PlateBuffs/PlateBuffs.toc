@@ -16,7 +16,6 @@
 ## X-Curse-Repository-ID: wow/platebuffs/mainline
 
 ## X-Website: https://github.com/bkader/PlateBuffs_WoTLK
-## X-Donate: bkader@mail.com
 ## X-Discord: https://discord.gg/a8z5CyS3eW
 ## X-License: All Rights Reserved
 ## X-Date: 2022-05-25 @ 10:45 AM |cff808080UTC|r

@@ -130,7 +130,6 @@ L["Who"] = "谁"
 L["about"] = "关于" -- Needs review
 L["author"] = "作者" -- Needs review
 L["clickCopy"] = "点击并按下 Ctrl-C 来复制" -- Needs review
-L["donate"] = "捐赠" -- Needs review
 L["email"] = "Email" -- Needs review
 L["enableDesc"] = "启用/禁用这个插件。" -- Needs review
 L["license"] = "许可" -- Needs review

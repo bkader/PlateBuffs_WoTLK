@@ -1029,14 +1029,12 @@ do
 		"X-Website",
 		"X-Credits",
 		"X-Localizations",
-		"X-Donate",
 		"X-Discord",
 		"X-Bitcoin"
 	}
 	local haseditbox = {
 		["X-Website"] = true,
 		["X-Email"] = true,
-		["X-Donate"] = true,
 		["X-Discord"] = true,
 		["Email"] = true,
 		["eMail"] = true,
@@ -1046,7 +1044,6 @@ do
 		["Author"] = L.author,
 		["X-License"] = L.license,
 		["X-Website"] = L.website,
-		["X-Donate"] = L.donate,
 		["X-Discord"] = "Discord",
 		["X-Email"] = L.email,
 		["X-Bitcoin"] = L.bitcoinAddress
