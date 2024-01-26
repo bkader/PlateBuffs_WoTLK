@@ -522,7 +522,7 @@ do
 				name, _, icon, count, _, duration, expirationTime, unitCaster, _, _, spellId = UnitBuff(unitID, i)
 				icon = icon:upper():gsub("(.+)\\(.+)\\", "")
 
-				local spellOpts = (duration > 0) and self:HaveSpellOpts(name, spellId) or nil
+				local spellOpts = self:HaveSpellOpts(name, spellId)
 				if spellOpts and spellOpts.show and P.defaultBuffShow ~= 4 then
 					if
 						spellOpts.show == 1 or
