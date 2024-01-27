@@ -320,7 +320,9 @@ local function iconOnUpdate(self, elapsed)
 					self.cd2:SetTextColor(core:RedToGreen(timeLeft, self.duration))
 				end
 				if not self.cdtexture.SetCooldown then
-					self.cdtexture:SetHeight(max(0.00001, ((self.duration - timeLeft) / self.duration) * P.iconSize2))
+					local currRatio = 1 - rawTimeLeft / self.duration
+					local currSize = currRatio * self.icon:GetHeight()
+					self.cdtexture:SetHeight(max(0.00001, currSize))
 				end
 			end
 
