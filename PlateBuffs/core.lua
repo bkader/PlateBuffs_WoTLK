@@ -570,7 +570,7 @@ do
 				name, _, icon, count, debuffType, duration, expirationTime, unitCaster, _, _, spellId = UnitDebuff(unitID, i)
 				icon = icon:upper():gsub("INTERFACE\\ICONS\\", "")
 
-				local spellOpts = (duration > 0) and self:HaveSpellOpts(name, spellId) or nil
+				local spellOpts = self:HaveSpellOpts(name, spellId)
 				if spellOpts and spellOpts.show and P.defaultDebuffShow ~= 4 then
 					if
 						spellOpts.show == 1 or
