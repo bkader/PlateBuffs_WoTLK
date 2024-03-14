@@ -7,6 +7,10 @@
 README.md           export-ignore
 
 * text=auto
+*.gitattributes text eol=lf
+*.lua text eol=lf
+*.toc text eol=lf
+*.xml text eol=lf
 
 # GitHub
 .github         text
