@@ -61,74 +61,342 @@ local totemList = {
 
 -- Important spells, add them with huge icons.
 local defaultSpells1 = {
+	-- mage
 	118, --Polymorph
+	45438, --Ice Block
+	
+	-- shaman
 	51514, --Hex
+	
+	-- warlock
 	710, --Banish
 	6358, --Seduction
-	6770, --Sap
-	605, --Mind Control
-	33786, --Cyclone
 	5782, --Fear
 	5484, --Howl of Terror
 	6789, --Death Coil
-	45438, --Ice Block
-	642, --Divine Shield
+	
+	-- rogue
+	6770, --Sap
+	2094, --Blind
+	31230, --cheat death
+	
+	-- priest
+	605, --Mind Control
 	8122, --Psychic Scream
+	33206, --Pain Suppression (priest)
+	47585, --Dispersion (priest)
+	9484, -- shackle undead
+	47788, -- guardian spirit
+	
+	-- druid
+	33786, --Cyclone
 	339, --Entangling Roots
+	29166, --Innervate (druid)
+	61336, --survival instincts
+	34496, --survival instincts
+	
+	-- hunter
+	19386, --Wyvern Sting (hunter)
+	19263, --Deterrence
+	
+	-- paladin
+	642, --Divine Shield
+	
+	-- warrior
+	23920, -- spell reflection
+	18499, -- berserker rage
+	
+	-- misc
 	23335, -- Silverwing Flag (alliance WSG flag)
 	23333, -- Warsong Flag (horde WSG flag)
 	34976, -- Netherstorm Flag (EotS flag)
-	2094, --Blind
-	33206, --Pain Suppression (priest)
-	29166, --Innervate (druid)
-	47585, --Dispersion (priest)
-	19386 --Wyvern Sting (hunter)
+	14267, -- Horde Flag 
+	14268 -- Alliance Flag
+	
 }
 
 -- semi-important spells, add them with mid size icons.
 local defaultSpells2 = {
+	-- mage
+	12472, -- Icy Veins (mage)
+	44572, -- Deep Freeze (mage)
+	122, -- frost nova
+	12494, --frostbite
+	55080, -- shattered barrier
+	31661, -- dragon's breath
+	33395, -- freeze (pet nova)
+	12042, -- Arcane Power
+	38643, -- Blink
+	41425, -- Hypothermia 
+	12357, -- Impact
+	28500, -- Invisibility 
+	31641, -- Blazing Speed
+	54749, -- Burning Determination
+	12043, -- Presence of Mind
+	12051 , -- Evocation
+	43039, --Ice Barrier
+	18469, -- improved counterspell
+	64346, --fiery payback
+	28682, -- combustion
+	
+	-- shaman
+	16166, -- elemental mastery
+	8178, -- grounding totem
+	64695, -- earthgrab (earthbind root effect)
+	30823, -- Shamanistic Rage
+	16188, -- Ancestral Swiftness
+	55277, -- stoneclaw absorb
+	58875, -- spirit walk (spirit wolf)
+	58861, -- bash (spirit wolf)
+	16191, -- mana tide totem
+	
+	-- warlock
+	19647, -- spelllock
+	30283, -- shadowfury
+	18708, -- Fel Domination
+	8612, -- Phase Shift
+	20329, -- Phase Shift
+	47241, -- Metamorphosis
+  	7812, -- sacrifice (voidwalker)
+	6229, -- shadow ward
+	
+	-- rogue
+	31224, -- Cloak of Shadows (rogue)
+	26669, -- Evasion (rogue)
+	11305, -- Sprint
+	408, -- kidney shot
+	1833, -- cheap shot
+	1776, -- gouge
+	1330, -- garrote silence
+	51690, -- killing spree
+	13750, -- adrenaline rush
+	45182, -- cheating death
+	14278, -- Ghostly Strike
+	36554, -- Shadowstep
+	13877, -- Blade Flurry	
+	51722, --Dismantle
+	51713, --Shadow Dance
+	14177, --Cold Blood
+	
+	-- priest
 	15487, --Silence (priest)
-	10060, --Power Infusion (priest)
-	2825, --Bloodlust
-	5246, --Intimidating Shout (warrior)
-	31224, --Cloak of Shadows (rogue)
-	498, --Divine Protection
-	47476, --Strangulate (warlock)
-	31884, --Avenging Wrath (pally)
+	10060, -- Power Infusion (priest)
+	64044, -- Psychic Horror
+	10060, -- power's infusion
+	27827, -- Spirit of Redemption
+	6346, -- Fear Ward
+	
+	-- druid
+	22812, -- Barkskin (druid)
+	53312, -- Nature's Grasp
+	1850, -- Dash
+	2637, -- Hibernate
+	16689, -- Nature's Grasp (Druid)
+	5211, -- bash
+	22570, -- maim
+	16811, -- Nature's Grasp
+	49803, -- Pounce
+	53201, -- Starfall
+	50334, -- Berserk
+	22842, -- Frenzied Regeneration
+	19675, -- Feral Charge Effect
+	38373, -- The Beast Within
+	9634, -- dire bear form
+	17116, -- Nature's Swiftness
+	
+	-- hunter
 	37587, --Bestial Wrath (hunter)
-	12472, --Icy Veins (mage)
-	49039, --Lichborne (DK)
-	48792, --Icebound Fortitude (DK)
-	5277, --Evasion (rogue)
-	53563, --Beacon of Light (pally)
-	22812, --Barkskin (druid)
-	67867, --Trampled (ToC arena spell when you run over someone)
-	1499, --Freezing Trap
-	2637, --Hibernate
-	64044, --Psychic Horror
-	19503, --Scatter Shot (hunter)
+	19574, --Bestial Wrath
 	34490, --Silencing Shot (hunter)
-	10278, --Hand of Protection (pally)
-	10326, --Turn Evil (pally)
-	44572, --Deep Freeze (mage)
+	19503, --Scatter Shot (hunter)
+	1499, --Freezing Trap
+	60192, --freezing trap
+	3355, -- Freezing Arrow Effect
+	14309, --Freezing Trap Effect
+	60210, --Freezing Arrow Effect
+	53480, -- Roar of Sacrifice
+	54216, -- master's call
+	3045, -- rapid fire
+	19577, -- Intimidation 
+	19574, -- Bestial Wrath 
+	56651, -- Master's Call
+	53476, -- Pet Intervene
+	53548, -- pin (pet)
+	53479, -- Last Stand (pet)
+	1742, -- Cower (pet)
+	26064, -- Shell Shield (pet)
+	26065, -- Shell Shield (pet)
+	40087, -- Shell Shield (pet)
+	64804, -- Entrapment
+	
+	-- paladin
+	53563, --Beacon of Light (pally)
+	498, --Divine Protection
+	31884, --Avenging Wrath (pally)
+	498, --Divine Protection
 	20066, --Repentance (pally)
-	46968, --Shockwave (warrior)
+	10326, --Turn Evil (pally)
+	10278, --Hand of Protection (pally)
+	1022, -- Hand of protection
+	6940, -- hand of sacrifice
+	1044, -- hand of freedom
+	1038, -- hand of salvation
+	31821, -- aura mastery
+	31850, -- ardent defender
+	66235, -- ardent defender
+	53659, -- sacred cleansing
+	853, -- Hammer of Justice
+	31842, -- Divine Illumination
+	19752, -- Divine Intervention 
+	64205, -- Divine Sacrifice
+	20216, -- Divine Favor
+	54428, -- Divine Plea
+	
+	-- warrior
+	871, -- shield wall
+	5246, --Intimidating Shout (warrior)
 	46924, --Bladestorm (warrior)
-	16689, --Nature's Grasp (Druid)
-	2983, --Sprint (rogue)
-	2335, --Swiftness Potion
-	6624, --Free Action Potion
-	3448, --Lesser Invisibility Potion
-	11464, --Invisibility Potion
-	17634, --Potion of Petrification
-	53905, --Indestructible Potion
-	54221, --Potion of Speed
-	1850 --Dash
+	46968, --Shockwave (warrior)
+	1719, -- recklessness
+	7922, -- charge stun
+	20253, -- intercept stun
+	23694, -- Improved Hamstring
+	2565, -- Shield Block
+	676, -- Disarm
+	12292, -- Death Wish
+	12809, -- Concussion Blow
+	18498, -- Gag Order
+	3411, -- Intervene
+	55694, 	-- Enraged Regeneration
+	12328, -- Sweeping Strikes
+	20230, -- Retaliation
+	64849, -- Unrelenting Assault
+	12976, -- Last Stand
+	23694, -- Improved Hamstring
+	58373, -- Glyph of Hamstring
+	
+	-- dk
+	47476, --Strangulate (dk) 55334?
+	49039, --Lichborne (DK)
+	48792, --Icebound Fortitude ibf (DK) 58130 ?
+	48707, -- AMS
+	47481, -- gnaw (pet stun)
+	48707 , -- Anti-Magic Shell
+	51052, -- Anti-Magic Zone
+	51271, -- Unbreakable Armor
+	55233, -- Vampiric Blood
+	51209, -- hungering cold
+	45524, -- chains of ice
+	49016, -- Hysteria
+	
+	30217, --Adamantite Grenade
+	24375, --War Stomp
+	67867 --Trampled (ToC arena spell when you run over someone)
+	
 }
 
 -- used to add spell only by name ( no need spellid )
 local defaultSpells3 = {
-	5782 -- Fear
+	--5782 -- Fear
+	-- mage
+	43008, -- Ice Armor
+	168, -- Frost Armor
+	43024, -- Mage Armor
+	43046, -- Molten Armor
+	44543, -- Fingers of Frost
+	
+	-- shaman
+	55600, -- Earth Shield
+	53819, -- Maelstrom weapon
+	
+	-- warlock
+	30299, -- nether protection
+	
+	-- rogue
+	58427, -- Overkill
+	
+	-- priest
+	15286, -- Vampiric Embrace
+	15473, -- shadowform
+	6788, -- Weakend Soul
+	
+	-- paladin
+	59578, -- Art of War
+	25771, -- Forbearance 
+	53601, -- Sacred Shield
+	54149, -- Infusion of Light
+	
+	-- druid
+	--52610, -- savage roar 
+	69369, -- Predatory Swiftness
+	48441, -- rejuvenation
+	48451, -- lifebloom
+	33981, -- tree of life
+	783, -- travel form
+	768, -- feral form (?)
+	
+	-- warrior
+	60503, -- Taste For Blood
+	
+	-- dk
+	48263, -- Frost Presence
+	49222, -- bone shield
+
+	-- hunter
+	34074, -- aspect of the viper
+	
+	-- dmg racials
+	33697, -- blood fury
+	26297, -- berserking
+	
+		-- trinkets 
+	60436, -- Grim Toll
+	65020, -- Mjolnir Runestone
+	71541, -- Icy Rage (WFS)
+	67772, -- Paragon (DV HC)
+	67708, -- Paragon (DV NM)
+	75456, -- Piercing Twilight (STS) HC
+	75458, -- Piercing Twilight (STS) NM
+	75473, -- CTS HC
+	75466, -- CTS NM
+	71601, -- DFO NM 
+	71644, -- DFO HC
+	55775, -- Swordguard Embroidery (tailoring ap proc)
+	55637, -- Lightweave (tailoring sp proc
+	71636, -- Siphoned Power (phylactery hc)
+	71605, -- Siphoned Power (phylactery nm)
+	-- DBW HC
+	71556, -- AGI
+	71559, -- CRIT
+	71558, -- AP
+	71560, -- HASTE Speed of the Vrykul
+	71561, -- STR	
+	-- DBW NM
+	71484, -- STR 
+	71492, -- HASTE 
+	71486, -- AP Power of the Taunka
+	71491, -- CRIT
+	71485, -- AGI
+	
+		-- misc
+	72623,  --Drink
+	14823, --Drinking
+	25888, --Food
+	2825, --Bloodlust
+	32182, --Heroism
+	28730, --Arcane Torrent
+	7744, --Will of the Forsaken
+	53908, --Speed POT
+	54861, --Nitro Boots
+	61242, --Parachute
+	2335, --Swiftness Potion
+	6624, --Free Action Potion
+	6615, --Free Action Potion
+	3448, --Lesser Invisibility Potion
+	11464, --Invisibility Potion
+	17634, --Potion of Petrification
+	53905, --Indestructible Potion
+	54221 --Potion of Speed
 }
 
 local regEvents = {
@@ -208,15 +476,17 @@ for i = 1, table_getn(defaultSpells2) do
 	end
 end
 
+
 for i = 1, table_getn(defaultSpells3) do
 	local spellName = GetSpellInfo(defaultSpells3[i])
 	if spellName then
 		core.defaultSettings.profile.spellOpts[spellName] = {
-			spellID = "No SpellID",
-			increase = 1.5,
-			cooldownSize = 14,
+			--spellID = "No SpellID", -- wasn't used anyway, making it a lesser important buffs category
+			spellID = defaultSpells3[i],
+			increase = 1,
+			cooldownSize = 10,
 			show = 1,
-			stackSize = 14
+			stackSize = 10
 		}
 	end
 end
@@ -518,6 +788,7 @@ do
 			local i = 1
 			local name, icon, count, duration, expirationTime, unitCaster, spellId, debuffType
 
+			
 			while UnitBuff(unitID, i) do
 				name, _, icon, count, _, duration, expirationTime, unitCaster, _, _, spellId = UnitBuff(unitID, i)
 				icon = icon:upper():gsub("(.+)\\(.+)\\", "")
