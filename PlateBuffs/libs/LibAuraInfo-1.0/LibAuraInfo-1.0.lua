@@ -28,7 +28,8 @@ local COMBATLOG_OBJECT_TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
 local tonumber = tonumber
 local strsplit = strsplit
 
-local MAJOR, MINOR = "LibAuraInfo-1.0", 7
+-- Match the GladiusEx fork; a higher minor can hide its spectator APIs.
+local MAJOR, MINOR = "LibAuraInfo-1.0", 8
 if not LibStub then error(MAJOR .. " requires LibStub.") return end
 
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
@@ -66,16 +67,74 @@ lib.debuffTypes = {
 	[4] = "Curse",
 }
 
-lib.trackAuras = false
-lib.callbacksUsed = {}
+lib.callbacksUsed = lib.callbacksUsed or {}
+lib.trackAuras = next(lib.callbacksUsed) ~= nil
+local GUIDLastSeen = {}
+local durationLastSeen = {}
+local unitPoll = {}
+local cleanupElapsed = 0
+local AuraInfo_OnUpdate
+
+function lib:ClearTransientData()
+    wipe(self.GUIDAuras)
+    wipe(self.GUIDData_name)
+    wipe(self.GUIDData_flags)
+    wipe(self.GUIDDurations)
+    wipe(self.GUIDDrEffects_reset)
+    wipe(self.GUIDDrEffects_diminished)
+    wipe(GUIDLastSeen)
+    wipe(durationLastSeen)
+    wipe(unitPoll)
+    cleanupElapsed = 0
+end
+
+function lib:PruneTransientData()
+    local now = GetTime()
+    for guid in pairs(self.GUIDAuras) do
+        self:RemoveExpiredAuras(guid)
+    end
+    for guid, seen in pairs(GUIDLastSeen) do
+        if now - seen >= 300 then
+            -- Preserve timed auras that are still running, even off screen.
+            local activeAura
+            local auras = self.GUIDAuras[guid]
+            if auras then
+                for _, aura in ipairs(auras) do
+                    if aura.expirationTime and aura.expirationTime > now then
+                        activeAura = true
+                        break
+                    end
+                end
+            end
+            if not activeAura then
+                self.GUIDAuras[guid] = nil
+                self.GUIDData_name[guid] = nil
+                self.GUIDData_flags[guid] = nil
+                GUIDLastSeen[guid] = nil
+            end
+        end
+    end
+    for key, expires in pairs(self.GUIDDrEffects_reset) do
+        if expires <= now then
+            self.GUIDDrEffects_reset[key] = nil
+            self.GUIDDrEffects_diminished[key] = nil
+        end
+    end
+    for key, seen in pairs(durationLastSeen) do
+        if now - seen >= 1800 then
+            self.GUIDDurations[key] = nil
+            durationLastSeen[key] = nil
+        end
+    end
+end
 
 --~ lib.callbacks:Fire("LibAuraInfo-1.0_xxxx", "blaw")
 function lib.callbacks:OnUsed(target, eventname)
 --~ 	debugPrint("OnUsed", target, eventname)
 	
-	lib.callbacksUsed[eventname] = lib.callbacksUsed[eventname] or {}
-	table_insert(lib.callbacksUsed[eventname], #lib.callbacksUsed[eventname]+1, target)
+	lib.callbacksUsed[eventname] = true
 	lib.trackAuras = true
+	lib.frame:SetScript("OnUpdate", AuraInfo_OnUpdate)
 	lib.frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
 	
 	lib.frame:RegisterEvent('UPDATE_MOUSEOVER_UNIT')
@@ -87,23 +146,10 @@ end
 
 function lib.callbacks:OnUnused(target, eventname)
 --~ 	debugPrint("OnUsed", target, eventname)
-	if lib.callbacksUsed[eventname] then
-		for i= #lib.callbacksUsed[eventname], 1, -1 do 
-			if lib.callbacksUsed[eventname][i] == target then
-				table_remove(lib.callbacksUsed[eventname], i)
-			end
-		end
-	end
-	
-	for event, value in pairs(lib.callbacksUsed) do 
-		if #value == 0 then
-			lib.callbacksUsed[event] = nil
-		end
-	end
-	
-	for event in pairs(lib.callbacksUsed) do 
-		return
-	end
+	lib.callbacksUsed[eventname] = nil
+	if next(lib.callbacksUsed) then return end
+	lib.frame:SetScript("OnUpdate", nil)
+	lib:ClearTransientData()
 	lib.trackAuras = false
 	lib.frame:UnregisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
 	
@@ -128,7 +174,7 @@ local function ResetUnitAuras(unitID)
 end
 
 function lib:AddAuraFromUnitID(dstGUID, spellID, srcGUID, isDebuff, debuffType, duration, expirationTime, stackCount)
-	local currentTime = GetTime()
+    GUIDLastSeen[dstGUID] = GetTime()
 	
 	self.GUIDAuras[dstGUID] = self.GUIDAuras[dstGUID] or {}
 	
@@ -138,14 +184,15 @@ function lib:AddAuraFromUnitID(dstGUID, spellID, srcGUID, isDebuff, debuffType, 
 		duration = duration,
 		debuffType = debuffType,
 		isDebuff = isDebuff,
-		expirationTime = currentTime + duration,
-		startTime = currentTime,
+		expirationTime = expirationTime,
+		startTime = expirationTime - duration,
 		stackCount = stackCount,--This should only be added if stackCount is over 1, else it'll be nil.
 	})
 	
 end
 
 local function CheckUnitAuras(unitID, filterType)
+    if not unitID or not UnitExists(unitID) then return end
 --~ 	name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId  = UnitAura("unit", index or "name"[, "rank"[, "filter"]]) 
 	local i = 1;
 	local name, rank, dispelType, duration, isStealable, spellID, unitCaster, expirationTime, stackCount, shouldConsolidate
@@ -187,6 +234,7 @@ local function CheckUnitAuras(unitID, filterType)
 					if duration > 0 then-- Sometimes UnitAura says a spell has 0 duration when it realy has more.
 						--caster's duration doesn't match our DB, they're probably speced into something. lets remember that.
 						lib.GUIDDurations[GUID.."-"..spellID] = duration
+                        durationLastSeen[GUID.."-"..spellID] = GetTime()
 					end
 					
 					--[===[@debug@
@@ -238,6 +286,15 @@ local function OnEvent(self, event, ...)
 	end
 end
 
+AuraInfo_OnUpdate = function(self, elapsed)
+    cleanupElapsed = cleanupElapsed + elapsed
+    if cleanupElapsed >= 30 then
+        cleanupElapsed = 0
+        lib:PruneTransientData()
+    end
+end
+lib.frame:SetScript("OnUpdate", lib.trackAuras and AuraInfo_OnUpdate or nil)
+
 function lib.frame:UPDATE_MOUSEOVER_UNIT()
 	ResetUnitAuras("mouseover")
 	CheckUnitAuras("mouseover", "HELPFUL")
@@ -250,7 +307,7 @@ function lib.frame:PLAYER_TARGET_CHANGED()
 	CheckUnitAuras("target", "HARMFUL")
 end
 
-function lib.frame:UNIT_TARGET(unitID)
+function lib.frame:UNIT_TARGET(event, unitID)
 	if not UnitIsUnit(unitID, "player") then
 		local targetID = unitID.."target"
 		ResetUnitAuras(targetID)
@@ -259,7 +316,7 @@ function lib.frame:UNIT_TARGET(unitID)
 	end
 end
 
-function lib.frame:UNIT_AURA(unitID)
+function lib.frame:UNIT_AURA(event, unitID)
 	ResetUnitAuras(unitID)
 	CheckUnitAuras(unitID, "HELPFUL")
 	CheckUnitAuras(unitID, "HARMFUL")
@@ -770,6 +827,10 @@ end
 function lib.frame:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 	--timestamp, eventType, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags
 	local timestamp, eventType, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags  = ...-- ***
+    if not self[eventType] then return end
+    local now = GetTime()
+    if srcGUID then GUIDLastSeen[srcGUID] = now end
+    if dstGUID then GUIDLastSeen[dstGUID] = now end
 
 	if srcGUID and not lib.GUIDData_name[srcGUID] then
 		SaveGUIDInfo(srcGUID, srcName, srcFlags)
@@ -784,19 +845,17 @@ function lib.frame:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
 end
 
 ----------------------------------------------
-function lib:RemoveExpiredAuras(dstGUID)	--
--- Remove expired auras from a GUID. 		--
-----------------------------------------------
-	if self.GUIDAuras[dstGUID] then
-		local data
-		local getTime = GetTime()
-		for i = #self.GUIDAuras[dstGUID], 1, -1 do 
-			data = self.GUIDAuras[dstGUID][i]
-			if getTime > data.expirationTime then
-				table_remove(self.GUIDAuras[dstGUID], i)
-			end
-		end
-	end
+function lib:RemoveExpiredAuras(dstGUID)
+    local auras = self.GUIDAuras[dstGUID]
+    if not auras then return end
+    local now = GetTime()
+    for i = #auras, 1, -1 do
+        local expires = auras[i].expirationTime
+        if expires and expires > 0 and now >= expires then
+            table_remove(auras, i)
+        end
+    end
+    if #auras == 0 then self.GUIDAuras[dstGUID] = nil end
 end
 
 ----------------------------------------------------------------------
@@ -828,6 +887,7 @@ function lib:AddAuraToGUID(dstGUID, spellID, srcGUID, isDebuff)	--
 -- Add a auraID to our GUID list.								--
 ------------------------------------------------------------------
 
+	GUIDLastSeen[dstGUID] = GetTime()
 	local duration = self:GetDuration(spellID, srcGUID, dstGUID)
 	local debuffType = self:GetDebuffType(spellID)
 	local currentTime = GetTime()
@@ -1005,14 +1065,8 @@ local function RemoveAuraFromGUID(dstGUID, spellID, srcGUID)	--
 end
 
 ------------------------------------------------------
-function lib:RemoveAllAurasFromGUID(dstGUID)		--
--- Remove all auras on a GUID. They must have died.	--
-------------------------------------------------------
-	if self.GUIDAuras[dstGUID] then
-		for i=#self.GUIDAuras[dstGUID], 1, -1 do 
-			table_remove(self.GUIDAuras[dstGUID], i)
-		end
-	end
+function lib:RemoveAllAurasFromGUID(dstGUID)
+    if dstGUID then self.GUIDAuras[dstGUID] = nil end
 end
 
 --[[
@@ -1184,6 +1238,7 @@ function lib:GetDuration(spellID, srcGUID, dstGUID, dstIsPlayer)
 			--Check if we've seen that caster cast a spell with a duration that doesn't match our own (spec/glphed into something?)
 			if self.GUIDDurations[srcGUID.."-"..spellID] then
 				local dur = self.GUIDDurations[srcGUID.."-"..spellID]
+                durationLastSeen[srcGUID.."-"..spellID] = GetTime()
 				
 				--Check if receiver GUID was given.
 				if dstGUID then
